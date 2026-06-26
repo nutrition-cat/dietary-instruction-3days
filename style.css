@@ -920,15 +920,7 @@ body {
         border-bottom: none !important;
     }
     
-    /* styling for bulk printing */
-    .printable-report-wrapper {
-        page-break-after: always;
-        break-after: page;
-    }
-    .printable-report-wrapper:last-child {
-        page-break-after: avoid;
-        break-after: avoid;
-    }
+
 }
 
 /* Slide animation for screen change */
