@@ -553,6 +553,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Render specific chart for this day page
                 renderPfcChartForContainer(wrapper, dayData.totals, dayIndex);
+
+                // 最後の日付でなければ、次の日付の前に強制改ページを挿入する
+                if (i < parsedData.dates.length - 1) {
+                    const pageBreak = document.createElement('div');
+                    pageBreak.className = 'html2pdf__page-break';
+                    printContainer.appendChild(pageBreak);
+                }
             }
 
             const opt = {
@@ -627,8 +634,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }).join('')}
                 </div>
 
-                <!-- Page Break inside report -->
-                <div class="html2pdf__page-break"></div>
+
 
                 <!-- Lower Section Analysis -->
                 <div class="analysis-section">

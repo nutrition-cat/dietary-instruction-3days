@@ -400,13 +400,13 @@ body {
 .printable-report {
     background-color: var(--bg-card);
     width: 1040px; /* Precise layout control for A4 Landscape */
-    padding: 15px;
+    padding: 10px 12px;
     border-radius: var(--radius-sm);
     box-shadow: 0 10px 40px rgba(0,0,0,0.04);
     border: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
 }
 
 /* Title Area */
@@ -492,7 +492,7 @@ body {
     flex-direction: column;
     background-color: #fafbfc;
     overflow: hidden;
-    min-height: 230px;
+    min-height: 180px;
     height: auto;
 }
 
@@ -520,7 +520,7 @@ body {
 
 /* Images Container in Meal Card */
 .meal-images-container {
-    height: 70px;
+    height: 60px;
     display: flex;
     gap: 5px;
     padding: 5px;
@@ -540,8 +540,8 @@ body {
 }
 
 .meal-img {
-    height: 60px;
-    width: 60px;
+    height: 50px;
+    width: 50px;
     object-fit: cover;
     border-radius: 4px;
     border: 1px solid rgba(0,0,0,0.08);
@@ -595,7 +595,7 @@ body {
 }
 
 .meal-card td {
-    padding: 5px 6px;
+    padding: 3px 5px;
     border-bottom: 1px dashed var(--border-color);
     vertical-align: top;
     word-break: break-all;
@@ -738,13 +738,13 @@ body {
     background-color: #fafbfc;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
-    padding: 8px 12px;
-    height: 140px; /* Matches analysis table height */
+    padding: 5px 10px;
+    height: 120px; /* Matches analysis table height */
 }
 
 .chart-wrapper {
-    width: 95px;
-    height: 95px;
+    width: 80px;
+    height: 80px;
     flex-shrink: 0;
     position: relative;
 }
@@ -836,7 +836,7 @@ body {
 
 .advice-input {
     width: 100%;
-    height: 42px;
+    height: 32px;
     border: none;
     resize: none;
     font-size: 11px;
@@ -892,7 +892,7 @@ body {
 
     .meal-card {
         height: auto !important;
-        min-height: 250px !important;
+        min-height: 160px !important;
         break-inside: avoid;
         page-break-inside: avoid;
     }
@@ -903,15 +903,13 @@ body {
     }
 
     .analysis-section {
-        page-break-before: always;
-        break-before: page;
-        margin-top: 10px;
+        margin-top: 5px;
     }
 
     .advice-section {
         break-inside: avoid;
         page-break-inside: avoid;
-        margin-top: 15px;
+        margin-top: 5px;
     }
     
     .advice-input::placeholder {
