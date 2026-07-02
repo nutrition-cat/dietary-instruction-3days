@@ -920,7 +920,13 @@ body {
         border-bottom: none !important;
     }
     
+    .advice-input {
+        display: none !important;
+    }
 
+    .advice-print-display {
+        display: block !important;
+    }
 }
 
 /* Slide animation for screen change */

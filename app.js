@@ -27,6 +27,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeDateKey = null; // Currently selected date key
     let pfcChartInstance = null; // Single chart instance for preview screen
 
+    // Synchronize advice textarea input to preview div
+    adviceTextarea.addEventListener('input', (e) => {
+        const display = document.getElementById('advice-print-display');
+        if (display) {
+            display.textContent = e.target.value || "アドバイスは未記入です。";
+        }
+    });
+
     // Initialize Lucide Icons
     lucide.createIcons();
 
@@ -357,6 +365,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Set metadata
         reportDateDisplay.textContent = dayData.displayDate;
         adviceTextarea.value = dayData.advice || "";
+        const advicePrintDisplay = document.getElementById('advice-print-display');
+        if (advicePrintDisplay) {
+            advicePrintDisplay.textContent = dayData.advice || "アドバイスは未記入です。";
+        }
 
         const meals = dayData.meals;
         const totals = dayData.totals;
@@ -516,7 +528,20 @@ document.addEventListener('DOMContentLoaded', () => {
             pagebreak: { mode: ['css', 'legacy'] }
         };
 
-        html2pdf().set(opt).from(element).save();
+        // 一時的にアドバイス入力欄を隠し、印刷用プレビューDIVを表示（長いコメントの切れ防止）
+        const advicePrintDisplay = document.getElementById('advice-print-display');
+        if (advicePrintDisplay) {
+            advicePrintDisplay.style.display = 'block';
+        }
+        adviceTextarea.style.display = 'none';
+
+        html2pdf().set(opt).from(element).save().then(() => {
+            // PDF出力完了後に元の入力画面表示に戻す
+            if (advicePrintDisplay) {
+                advicePrintDisplay.style.display = 'none';
+            }
+            adviceTextarea.style.display = 'block';
+        });
     });
 
     // 4.2 Download all days combined
