@@ -580,14 +580,14 @@ body {
 .meal-card table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 11px;
+    font-size: 12px;
 }
 
 .meal-card th {
     font-weight: 600;
     color: var(--text-muted);
     text-align: left;
-    padding: 4px 6px;
+    padding: 5px 6px;
     border-bottom: 1px solid var(--border-color);
     background-color: #fafbfc;
     position: sticky;
@@ -595,7 +595,7 @@ body {
 }
 
 .meal-card td {
-    padding: 3px 5px;
+    padding: 4px 6px;
     border-bottom: 1px dashed var(--border-color);
     vertical-align: top;
     word-break: break-all;
@@ -643,20 +643,20 @@ body {
 .analysis-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 11px;
+    font-size: 12px;
 }
 
 .analysis-table th {
     background-color: var(--primary-light);
     color: var(--primary-dark);
     font-weight: 700;
-    padding: 6px 8px;
+    padding: 7px 8px;
     border: 1px solid var(--border-color);
     text-align: center;
 }
 
 .analysis-table td {
-    padding: 4px 6px;
+    padding: 5px 6px;
     border: 1px solid var(--border-color);
     text-align: center;
 }
@@ -713,7 +713,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-size: 9.5px;
+    font-size: 10.5px;
     border-right: 1px dashed var(--border-color);
 }
 .vitamin-item:last-child {
@@ -739,7 +739,7 @@ body {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
     padding: 5px 10px;
-    height: 120px; /* Matches analysis table height */
+    height: 132px; /* Matches analysis table height */
 }
 
 .chart-wrapper {
@@ -759,10 +759,10 @@ body {
 
 .pfc-legend-item {
     display: grid;
-    grid-template-columns: 8px 80px 1fr auto;
+    grid-template-columns: 8px 90px 1fr auto;
     align-items: center;
     gap: 6px;
-    font-size: 10.5px;
+    font-size: 12px;
 }
 
 .legend-dot {
@@ -781,7 +781,7 @@ body {
 
 .legend-val {
     color: var(--text-muted);
-    font-size: 9.5px;
+    font-size: 10.5px;
 }
 
 .legend-pct {
@@ -796,7 +796,7 @@ body {
     margin-top: 6px;
     padding-top: 5px;
     border-top: 1px dashed var(--border-color);
-    font-size: 8.5px;
+    font-size: 9.5px;
     color: var(--text-muted);
     line-height: 1.2;
 }
@@ -836,14 +836,26 @@ body {
 
 .advice-input {
     width: 100%;
-    height: 32px;
+    height: 42px;
     border: none;
     resize: none;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-main);
     outline: none;
     padding: 4px;
     font-family: inherit;
+}
+
+.advice-print-display {
+    font-size: 12px;
+    min-height: 42px;
+    padding: 4px;
+    text-align: left;
+    color: var(--text-main);
+    font-family: inherit;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-all;
 }
 
 /* Page break trigger for html2pdf.js */

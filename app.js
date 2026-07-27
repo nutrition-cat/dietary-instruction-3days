@@ -728,14 +728,14 @@ document.addEventListener('DOMContentLoaded', () => {
                             <i data-lucide="pie-chart" class="subtitle-icon"></i>
                             <h3>1日のPFCバランス</h3>
                         </div>
-                        <div class="pfc-container" style="height: 140px;">
-                            <div class="chart-wrapper" style="width:95px; height:95px;">
+                        <div class="pfc-container">
+                            <div class="chart-wrapper">
                                 <canvas id="pfcChart-${dayIndex}"></canvas>
                             </div>
-                            <div class="pfc-details" style="font-size: 10px;">
-                                <div class="pfc-legend-item protein"><span class="legend-dot bg-pfc-p"></span><span class="legend-name" style="font-size:10px;">P (たんぱく質)</span><span id="pfc-p-val-${dayIndex}" class="legend-val" style="font-size:9px;">-</span><span id="pfc-p-pct-${dayIndex}" class="legend-pct">-</span></div>
-                                <div class="pfc-legend-item fat"><span class="legend-dot bg-pfc-f"></span><span class="legend-name" style="font-size:10px;">F (脂質)</span><span id="pfc-f-val-${dayIndex}" class="legend-val" style="font-size:9px;">-</span><span id="pfc-f-pct-${dayIndex}" class="legend-pct">-</span></div>
-                                <div class="pfc-legend-item carb"><span class="legend-dot bg-pfc-c"></span><span class="legend-name" style="font-size:10px;">C (炭水化物)</span><span id="pfc-c-val-${dayIndex}" class="legend-val" style="font-size:9px;">-</span><span id="pfc-c-pct-${dayIndex}" class="legend-pct">-</span></div>
+                            <div class="pfc-details">
+                                <div class="pfc-legend-item protein"><span class="legend-dot bg-pfc-p"></span><span class="legend-name">P (たんぱく質)</span><span id="pfc-p-val-${dayIndex}" class="legend-val">-</span><span id="pfc-p-pct-${dayIndex}" class="legend-pct">-</span></div>
+                                <div class="pfc-legend-item fat"><span class="legend-dot bg-pfc-f"></span><span class="legend-name">F (脂質)</span><span id="pfc-f-val-${dayIndex}" class="legend-val">-</span><span id="pfc-f-pct-${dayIndex}" class="legend-pct">-</span></div>
+                                <div class="pfc-legend-item carb"><span class="legend-dot bg-pfc-c"></span><span class="legend-name">C (炭水化物)</span><span id="pfc-c-val-${dayIndex}" class="legend-val">-</span><span id="pfc-c-pct-${dayIndex}" class="legend-pct">-</span></div>
                                 <div class="pfc-target-ref"><span class="ref-title">目標比率の目安（厚生労働省）:</span><span class="ref-body">P: 13〜20% | F: 20〜30% | C: 50〜65%</span></div>
                             </div>
                         </div>
@@ -749,7 +749,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span>栄養指導メモ・アドバイス欄</span>
                     </div>
                     <div class="advice-body">
-                        <div style="font-size:11px; white-space:pre-wrap; min-height:42px; padding:4px;">${advice || 'アドバイスは未記入です。'}</div>
+                        <div class="advice-print-display" style="display: block;">${advice || 'アドバイスは未記入です。'}</div>
                     </div>
                 </div>
             </div>
