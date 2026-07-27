@@ -478,26 +478,34 @@ body {
     font-weight: 600;
 }
 
-/* Meals Grid (4 Columns) */
+/* Meals Grid (Single Column for Vertical layout) */
 .meals-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
+    grid-template-columns: 1fr;
+    gap: 12px;
 }
 
 .meal-card {
-    border: 1px solid var(--border-color);
+    border: 1.5px solid var(--border-color);
     border-radius: var(--radius-sm);
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     background-color: #fafbfc;
     overflow: hidden;
-    min-height: 180px;
-    height: auto;
+    height: 190px;
+}
+
+.meal-card-left {
+    width: 220px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1.5px solid var(--border-color);
+    background-color: #fafbfc;
+    flex-shrink: 0;
 }
 
 .meal-card-header {
-    padding: 8px 12px;
+    padding: 6px 12px;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -520,14 +528,14 @@ body {
 
 /* Images Container in Meal Card */
 .meal-images-container {
-    height: 110px;
+    flex: 1;
     display: flex;
-    gap: 5px;
-    padding: 5px;
-    background-color: #f1f3f5;
+    gap: 8px;
+    padding: 6px;
+    background-color: #f8fafc;
     overflow-x: auto;
     align-items: center;
-    border-bottom: 1px solid var(--border-color);
+    justify-content: center;
 }
 
 /* Hide scrollbars for image container */
@@ -540,8 +548,8 @@ body {
 }
 
 .meal-img {
-    height: 100px;
-    width: 100px;
+    height: 120px;
+    width: 120px;
     object-fit: cover;
     border-radius: 4px;
     border: 1px solid rgba(0,0,0,0.08);
@@ -580,14 +588,14 @@ body {
 .meal-card table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 13px;
+    font-size: 14px;
 }
 
 .meal-card th {
     font-weight: 600;
     color: var(--text-muted);
     text-align: left;
-    padding: 5px 6px;
+    padding: 6px 8px;
     border-bottom: 1px solid var(--border-color);
     background-color: #fafbfc;
     position: sticky;
@@ -595,7 +603,7 @@ body {
 }
 
 .meal-card td {
-    padding: 5px 7px;
+    padding: 6px 8px;
     border-bottom: 1px dashed var(--border-color);
     vertical-align: top;
     word-break: break-all;
@@ -643,20 +651,20 @@ body {
 .analysis-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 13px;
+    font-size: 14px;
 }
 
 .analysis-table th {
     background-color: var(--primary-light);
     color: var(--primary-dark);
     font-weight: 700;
-    padding: 8px 10px;
+    padding: 9px 10px;
     border: 1px solid var(--border-color);
     text-align: center;
 }
 
 .analysis-table td {
-    padding: 6px 8px;
+    padding: 7px 8px;
     border: 1px solid var(--border-color);
     text-align: center;
 }
@@ -759,10 +767,10 @@ body {
 
 .pfc-legend-item {
     display: grid;
-    grid-template-columns: 8px 95px 1fr auto;
+    grid-template-columns: 8px 105px 1fr auto;
     align-items: center;
     gap: 6px;
-    font-size: 13px;
+    font-size: 14px;
 }
 
 .legend-dot {
@@ -781,7 +789,7 @@ body {
 
 .legend-val {
     color: var(--text-muted);
-    font-size: 11.5px;
+    font-size: 12.5px;
 }
 
 .legend-pct {
@@ -796,7 +804,7 @@ body {
     margin-top: 6px;
     padding-top: 5px;
     border-top: 1px dashed var(--border-color);
-    font-size: 10.5px;
+    font-size: 11px;
     color: var(--text-muted);
     line-height: 1.2;
 }
@@ -839,7 +847,7 @@ body {
     height: 120px;
     border: none;
     resize: none;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--text-main);
     outline: none;
     padding: 6px;
@@ -847,7 +855,7 @@ body {
 }
 
 .advice-print-display {
-    font-size: 13px;
+    font-size: 14px;
     min-height: 120px;
     padding: 6px;
     text-align: left;
