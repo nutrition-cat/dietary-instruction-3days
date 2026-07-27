@@ -35,6 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Synchronize patient name input to page 2 print header
+    patientNameInput.addEventListener('input', (e) => {
+        const display2 = document.getElementById('print-patient-display-2');
+        if (display2) {
+            display2.textContent = e.target.value.trim() || "　　　　";
+        }
+    });
+
     // Initialize Lucide Icons
     lucide.createIcons();
 
@@ -370,6 +378,21 @@ document.addEventListener('DOMContentLoaded', () => {
             advicePrintDisplay.textContent = dayData.advice || "アドバイスは未記入です。";
         }
 
+        // 2ページ目用印刷ヘッダーの同期
+        const dayIndex = parsedData.dates.indexOf(dateKey) + 1;
+        const printSubTitle2 = document.getElementById('print-sub-title-2');
+        if (printSubTitle2) {
+            printSubTitle2.textContent = `栄養分析・アドバイスレポート (${dayIndex}日目)`;
+        }
+        const printDateDisplay2 = document.getElementById('print-date-display-2');
+        if (printDateDisplay2) {
+            printDateDisplay2.textContent = dayData.displayDate;
+        }
+        const printPatientDisplay2 = document.getElementById('print-patient-display-2');
+        if (printPatientDisplay2) {
+            printPatientDisplay2.textContent = patientNameInput.value.trim() || "　　　　";
+        }
+
         const meals = dayData.meals;
         const totals = dayData.totals;
 
@@ -659,7 +682,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     }).join('')}
                 </div>
 
+                <!-- 2ページ目開始用の改ページデバイダー -->
+                <div class="html2pdf__page-break"></div>
 
+                <!-- 印刷・PDF用2ページ目ヘッダー -->
+                <div class="print-only-header">
+                    <div class="report-title-area" style="margin-bottom: 15px; border-bottom: 2px solid var(--primary);">
+                        <div class="title-main">
+                            <h2>栄養食事指導参考資料</h2>
+                            <p class="title-sub">栄養分析・アドバイスレポート (${dayIndex}日目)</p>
+                        </div>
+                        <div class="meta-inputs">
+                            <div class="meta-row">
+                                <span class="meta-label">食事記録日:</span>
+                                <span class="meta-value">${displayDate}</span>
+                            </div>
+                            <div class="meta-row">
+                                <span class="meta-label">対象者様:</span>
+                                <span class="meta-value" style="border-bottom: 1px solid #7f8c8d; padding: 2px 15px; font-weight:700; min-width:100px; text-align:center;">${patientName || '　　　　'}</span>
+                                <span class="meta-suffix">様</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Lower Section Analysis -->
                 <div class="analysis-section">
