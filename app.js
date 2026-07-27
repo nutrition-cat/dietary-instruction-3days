@@ -407,11 +407,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 imgContainer.innerHTML = `<span class="no-image-placeholder">写真なし</span>`;
             } else {
                 data.images.forEach(imgSrc => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'meal-img-wrapper';
                     const img = document.createElement('img');
                     img.src = imgSrc;
                     img.className = 'meal-img';
                     img.alt = `${type} image`;
-                    imgContainer.appendChild(img);
+                    wrapper.appendChild(img);
+                    imgContainer.appendChild(wrapper);
                 });
             }
 
@@ -788,11 +791,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 imgEl.innerHTML = `<span class="no-image-placeholder">写真なし</span>`;
             } else {
                 data.images.forEach(imgSrc => {
+                    const wrapperDiv = document.createElement('div');
+                    wrapperDiv.className = 'meal-img-wrapper';
                     const img = document.createElement('img');
                     img.src = imgSrc;
                     img.className = 'meal-img';
                     img.alt = `${type} image`;
-                    imgEl.appendChild(img);
+                    wrapperDiv.appendChild(img);
+                    imgEl.appendChild(wrapperDiv);
                 });
             }
 
