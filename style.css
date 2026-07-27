@@ -426,7 +426,7 @@ body {
 }
 
 .title-main .title-sub {
-    font-size: 12px;
+    font-size: 15px;
     color: var(--text-muted);
     font-weight: 500;
     letter-spacing: 0.5px;
@@ -439,7 +439,7 @@ body {
 }
 
 .meta-row {
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 500;
     display: flex;
     align-items: center;
@@ -459,10 +459,10 @@ body {
     border: none;
     border-bottom: 1.5px solid var(--text-muted);
     padding: 2px 5px;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
     color: var(--text-main);
-    width: 160px;
+    width: 180px;
     outline: none;
     text-align: center;
     transition: var(--transition);
@@ -530,10 +530,10 @@ body {
 .meal-images-container {
     flex: 1;
     display: flex;
-    gap: 8px;
+    gap: 6px;
     padding: 6px;
     background-color: #f8fafc;
-    overflow-x: auto;
+    overflow: hidden;
     align-items: center;
     justify-content: center;
 }
@@ -548,14 +548,19 @@ body {
 }
 
 .meal-img {
-    height: 120px;
-    width: 120px;
-    object-fit: cover;
+    height: 100%;
+    max-height: 120px;
+    max-width: 100%;
+    width: auto;
+    object-fit: contain;
     border-radius: 4px;
     border: 1px solid rgba(0,0,0,0.08);
     background-color: white;
     cursor: pointer;
     transition: transform 0.2s;
+    flex-shrink: 1;
+    flex-grow: 1;
+    min-width: 0;
 }
 
 .meal-img:hover {
@@ -563,7 +568,7 @@ body {
 }
 
 .no-image-placeholder {
-    font-size: 12px;
+    font-size: 14px;
     color: var(--text-muted);
     text-align: center;
     width: 100%;
@@ -588,14 +593,14 @@ body {
 .meal-card table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .meal-card th {
     font-weight: 600;
     color: var(--text-muted);
     text-align: left;
-    padding: 6px 8px;
+    padding: 6px 10px;
     border-bottom: 1px solid var(--border-color);
     background-color: #fafbfc;
     position: sticky;
@@ -603,7 +608,7 @@ body {
 }
 
 .meal-card td {
-    padding: 6px 8px;
+    padding: 6px 10px;
     border-bottom: 1px dashed var(--border-color);
     vertical-align: top;
     word-break: break-all;
@@ -637,7 +642,7 @@ body {
 }
 
 .section-subtitle h3 {
-    font-size: 13px;
+    font-size: 16px;
     font-weight: 700;
     color: var(--text-main);
 }
@@ -651,20 +656,20 @@ body {
 .analysis-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .analysis-table th {
     background-color: var(--primary-light);
     color: var(--primary-dark);
     font-weight: 700;
-    padding: 9px 10px;
+    padding: 10px 10px;
     border: 1px solid var(--border-color);
     text-align: center;
 }
 
 .analysis-table td {
-    padding: 7px 8px;
+    padding: 8px 8px;
     border: 1px solid var(--border-color);
     text-align: center;
 }
@@ -721,7 +726,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-size: 11px;
+    font-size: 12px;
     border-right: 1px dashed var(--border-color);
 }
 .vitamin-item:last-child {
@@ -767,10 +772,10 @@ body {
 
 .pfc-legend-item {
     display: grid;
-    grid-template-columns: 8px 105px 1fr auto;
+    grid-template-columns: 8px 120px 1fr auto;
     align-items: center;
     gap: 6px;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .legend-dot {
@@ -789,7 +794,7 @@ body {
 
 .legend-val {
     color: var(--text-muted);
-    font-size: 12.5px;
+    font-size: 13.5px;
 }
 
 .legend-pct {
@@ -804,7 +809,7 @@ body {
     margin-top: 6px;
     padding-top: 5px;
     border-top: 1px dashed var(--border-color);
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-muted);
     line-height: 1.2;
 }
@@ -828,7 +833,7 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 12px;
+    font-size: 15px;
     font-weight: 700;
 }
 
