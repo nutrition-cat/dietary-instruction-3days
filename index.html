@@ -104,7 +104,7 @@
                         </div>
                     </div>
 
-                    <!-- 上段前半：朝食・昼食 -->
+                    <!-- 上段：食事内容と写真（朝・昼・夕・その他） -->
                     <div class="meals-grid">
                         <!-- 朝食ブロック -->
                         <div class="meal-card" id="meal-breakfast">
@@ -159,34 +159,7 @@
                                 </table>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- 2ページ目開始用の改ページデバイダー -->
-                    <div class="html2pdf__page-break"></div>
-
-                    <!-- 印刷・PDF用2ページ目ヘッダー (後半食事用) -->
-                    <div class="print-only-header">
-                        <div class="report-title-area" style="margin-bottom: 15px; border-bottom: 2px solid var(--primary);">
-                            <div class="title-main">
-                                <h2>栄養食事指導参考資料</h2>
-                                <p class="title-sub" id="print-sub-title-2">食事記録レポート (後半)</p>
-                            </div>
-                            <div class="meta-inputs">
-                                <div class="meta-row">
-                                    <span class="meta-label">食事記録日:</span>
-                                    <span class="meta-value" id="print-date-display-2">-</span>
-                                </div>
-                                <div class="meta-row">
-                                    <span class="meta-label">対象者様:</span>
-                                    <span class="meta-value" id="print-patient-display-2" style="border-bottom: 1px solid #7f8c8d; padding: 2px 15px; font-weight:700; min-width:100px; text-align:center;">-</span>
-                                    <span class="meta-suffix">様</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 上段後半：夕食・その他 -->
-                    <div class="meals-grid">
                         <!-- 夕食ブロック -->
                         <div class="meal-card" id="meal-dinner">
                             <div class="meal-card-left">
@@ -238,30 +211,6 @@
                                         <!-- JSでデータが挿入されます -->
                                     </tbody>
                                 </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 3ページ目開始用の改ページデバイダー -->
-                    <div class="html2pdf__page-break"></div>
-
-                    <!-- 印刷・PDF用3ページ目ヘッダー (栄養分析用) -->
-                    <div class="print-only-header">
-                        <div class="report-title-area" style="margin-bottom: 15px; border-bottom: 2px solid var(--primary);">
-                            <div class="title-main">
-                                <h2>栄養食事指導参考資料</h2>
-                                <p class="title-sub" id="print-sub-title-3">栄養分析・アドバイスレポート</p>
-                            </div>
-                            <div class="meta-inputs">
-                                <div class="meta-row">
-                                    <span class="meta-label">食事記録日:</span>
-                                    <span class="meta-value" id="print-date-display-3">-</span>
-                                </div>
-                                <div class="meta-row">
-                                    <span class="meta-label">対象者様:</span>
-                                    <span class="meta-value" id="print-patient-display-3" style="border-bottom: 1px solid #7f8c8d; padding: 2px 15px; font-weight:700; min-width:100px; text-align:center;">-</span>
-                                    <span class="meta-suffix">様</span>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -425,8 +374,9 @@
     </div>
 
     <!-- Footer for Version Info -->
-    <footer class="app-footer no-print" style="text-align: center; padding: 15px; color: var(--text-muted); font-size: 11px;">
-        栄養食事指導支援システム v1.2 (1日1ページ版) &copy; 2026
+    <footer class="app-footer no-print" style="text-align: center; padding: 20px 15px; color: var(--text-muted); font-size: 12px; border-top: 1px solid var(--border-color); margin-top: 40px;">
+        <div>栄養食事指導支援システム &copy; 2026</div>
+        <div style="margin-top: 5px; font-weight: 500;">最終更新日: 2026年7月27日</div>
     </footer>
 
     <!-- Script Link -->

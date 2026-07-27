@@ -35,18 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Synchronize patient name input to page 2 & 3 print headers
-    patientNameInput.addEventListener('input', (e) => {
-        const val = e.target.value.trim() || "　　　　";
-        const display2 = document.getElementById('print-patient-display-2');
-        if (display2) {
-            display2.textContent = val;
-        }
-        const display3 = document.getElementById('print-patient-display-3');
-        if (display3) {
-            display3.textContent = val;
-        }
-    });
+
 
     // Initialize Lucide Icons
     lucide.createIcons();
@@ -383,35 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
             advicePrintDisplay.textContent = dayData.advice || "アドバイスは未記入です。";
         }
 
-        // 2ページ目（後半食事用）＆ 3ページ目（栄養分析用）印刷ヘッダーの同期
-        const dayIndex = parsedData.dates.indexOf(dateKey) + 1;
-        const pName = patientNameInput.value.trim() || "　　　　";
 
-        const printSubTitle2 = document.getElementById('print-sub-title-2');
-        if (printSubTitle2) {
-            printSubTitle2.textContent = `食事記録レポート (後半) (${dayIndex}日目)`;
-        }
-        const printDateDisplay2 = document.getElementById('print-date-display-2');
-        if (printDateDisplay2) {
-            printDateDisplay2.textContent = dayData.displayDate;
-        }
-        const printPatientDisplay2 = document.getElementById('print-patient-display-2');
-        if (printPatientDisplay2) {
-            printPatientDisplay2.textContent = pName;
-        }
-
-        const printSubTitle3 = document.getElementById('print-sub-title-3');
-        if (printSubTitle3) {
-            printSubTitle3.textContent = `栄養分析・アドバイスレポート (${dayIndex}日目)`;
-        }
-        const printDateDisplay3 = document.getElementById('print-date-display-3');
-        if (printDateDisplay3) {
-            printDateDisplay3.textContent = dayData.displayDate;
-        }
-        const printPatientDisplay3 = document.getElementById('print-patient-display-3');
-        if (printPatientDisplay3) {
-            printPatientDisplay3.textContent = pName;
-        }
 
         const meals = dayData.meals;
         const totals = dayData.totals;
@@ -658,7 +619,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="report-title-area">
                     <div class="title-main">
                         <h2>栄養食事指導参考資料</h2>
-                        <p class="title-sub">食事記録レポート (前半) (${dayIndex}日目)</p>
+                        <p class="title-sub">食事記録レポート (${dayIndex}日目)</p>
                     </div>
                     <div class="meta-inputs">
                         <div class="meta-row">
@@ -673,11 +634,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
 
-                <!-- meals-grid 前半: 朝食・昼食 -->
+                <!-- Meals Grid -->
                 <div class="meals-grid">
-                    ${['breakfast', 'lunch'].map(type => {
-                        const jpName = type === 'breakfast' ? '朝食' : '昼食';
-                        const emoji = type === 'breakfast' ? '☀️' : '🕛';
+                    ${['breakfast', 'lunch', 'dinner', 'other'].map(type => {
+                        const jpName = type === 'breakfast' ? '朝食' : type === 'lunch' ? '昼食' : type === 'dinner' ? '夕食' : 'その他';
+                        const emoji = type === 'breakfast' ? '☀️' : type === 'lunch' ? '🕛' : type === 'dinner' ? '🌙' : '☕';
                         return `
                             <div class="meal-card">
                                 <div class="meal-card-left">
@@ -702,85 +663,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                         `;
                     }).join('')}
-                </div>
-
-                <!-- 2ページ目開始用の改ページデバイダー -->
-                <div class="html2pdf__page-break"></div>
-
-                <!-- 印刷・PDF用2ページ目ヘッダー (食事後半用) -->
-                <div class="print-only-header">
-                    <div class="report-title-area" style="margin-bottom: 15px; border-bottom: 2px solid var(--primary);">
-                        <div class="title-main">
-                            <h2>栄養食事指導参考資料</h2>
-                            <p class="title-sub">食事記録レポート (後半) (${dayIndex}日目)</p>
-                        </div>
-                        <div class="meta-inputs">
-                            <div class="meta-row">
-                                <span class="meta-label">食事記録日:</span>
-                                <span class="meta-value">${displayDate}</span>
-                            </div>
-                            <div class="meta-row">
-                                <span class="meta-label">対象者様:</span>
-                                <span class="meta-value" style="border-bottom: 1px solid #7f8c8d; padding: 2px 15px; font-weight:700; min-width:100px; text-align:center;">${patientName || '　　　　'}</span>
-                                <span class="meta-suffix">様</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- meals-grid 後半: 夕食・その他 -->
-                <div class="meals-grid">
-                    ${['dinner', 'other'].map(type => {
-                        const jpName = type === 'dinner' ? '夕食' : 'その他';
-                        const emoji = type === 'dinner' ? '🌙' : '☕';
-                        return `
-                            <div class="meal-card">
-                                <div class="meal-card-left">
-                                    <div class="meal-card-header bg-${type}">
-                                        <span class="meal-icon">${emoji}</span>
-                                        <h3>${jpName}</h3>
-                                    </div>
-                                    <div class="meal-images-container" id="images-${type}-${dayIndex}"></div>
-                                </div>
-                                <div class="meal-table-container">
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>料理名</th>
-                                                <th>メモ</th>
-                                                <th style="width: 60px; text-align: right;">単位</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="list-${type}-${dayIndex}"></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-
-                <!-- 3ページ目開始用の改ページデバイダー -->
-                <div class="html2pdf__page-break"></div>
-
-                <!-- 印刷・PDF用3ページ目ヘッダー (栄養分析用) -->
-                <div class="print-only-header">
-                    <div class="report-title-area" style="margin-bottom: 15px; border-bottom: 2px solid var(--primary);">
-                        <div class="title-main">
-                            <h2>栄養食事指導参考資料</h2>
-                            <p class="title-sub">栄養分析・アドバイスレポート (${dayIndex}日目)</p>
-                        </div>
-                        <div class="meta-inputs">
-                            <div class="meta-row">
-                                <span class="meta-label">食事記録日:</span>
-                                <span class="meta-value">${displayDate}</span>
-                            </div>
-                            <div class="meta-row">
-                                <span class="meta-label">対象者様:</span>
-                                <span class="meta-value" style="border-bottom: 1px solid #7f8c8d; padding: 2px 15px; font-weight:700; min-width:100px; text-align:center;">${patientName || '　　　　'}</span>
-                                <span class="meta-suffix">様</span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Lower Section Analysis -->

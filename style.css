@@ -881,9 +881,7 @@ body {
     height: 0;
 }
 
-.print-only-header {
-    display: none !important;
-}
+
 
 /* ==========================================
    PRINT STYLING & MEDIA QUERIES
@@ -956,10 +954,6 @@ body {
     }
 
     .advice-print-display {
-        display: block !important;
-    }
-
-    .print-only-header {
         display: block !important;
     }
 }
