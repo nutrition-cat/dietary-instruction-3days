@@ -372,6 +372,11 @@ document.addEventListener('DOMContentLoaded', () => {
             advicePrintDisplay.textContent = dayData.advice || "アドバイスは未記入です。";
         }
 
+        const dayIndex = parsedData.dates.indexOf(dateKey) + 1;
+        if (dayNumberLabel) {
+            dayNumberLabel.textContent = `食事記録レポート (${dayIndex}日目)`;
+        }
+
 
 
         const meals = dayData.meals;
