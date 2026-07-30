@@ -662,7 +662,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                             <tr>
                                                 <th>料理名</th>
                                                 <th>メモ</th>
-                                                <th style="width: 60px; text-align: right;">単位</th>
+                                                <th style="width: 120px; text-align: right;">単位</th>
                                             </tr>
                                         </thead>
                                         <tbody id="list-${type}-${dayIndex}"></tbody>
