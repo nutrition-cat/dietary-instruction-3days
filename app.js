@@ -20,7 +20,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const reportDateDisplay = document.getElementById('report-date-display');
     const adviceTextarea = document.getElementById('advice-textarea');
     const dateTabsContainer = document.getElementById('date-tabs-container');
-    const dayNumberLabel = document.getElementById('day-number-label');
+    const dayNumberInput = document.getElementById('day-number-input');
+
+    // Synchronize day number input to global state
+    dayNumberInput.addEventListener('input', (e) => {
+        if (activeDateKey && parsedData && parsedData.days[activeDateKey]) {
+            parsedData.days[activeDateKey].dayLabel = e.target.value;
+        }
+    });
 
     // Global state
     let parsedData = null; // Stores all days: { days: { "2026-06-22": { meals, totals } }, dates: [...] }
@@ -373,8 +380,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const dayIndex = parsedData.dates.indexOf(dateKey) + 1;
-        if (dayNumberLabel) {
-            dayNumberLabel.textContent = `食事記録レポート (${dayIndex}日目)`;
+        // Load or initialize dayLabel in parsedData state
+        if (dayData.dayLabel === undefined) {
+            dayData.dayLabel = String(dayIndex);
+        }
+        if (dayNumberInput) {
+            dayNumberInput.value = dayData.dayLabel;
         }
 
 
@@ -577,12 +588,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const dayData = parsedData.days[dateKey];
                 const dayIndex = i + 1;
 
+                const dayLabel = dayData.dayLabel !== undefined ? dayData.dayLabel : String(dayIndex);
+
                 // Create report wrapper
                 const wrapper = document.createElement('div');
                 wrapper.className = 'printable-report-wrapper';
                 
                 // Inject report structure template
-                wrapper.innerHTML = createReportHtmlTemplate(dateKey, dayIndex, dayData.displayDate, patientName, dayData.advice);
+                wrapper.innerHTML = createReportHtmlTemplate(dateKey, dayIndex, dayData.displayDate, patientName, dayData.advice, dayLabel);
                 printContainer.appendChild(wrapper);
 
                 // Populate dynamic tables for this date
@@ -620,14 +633,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Helper: Dynamic template creator for bulk print
-    function createReportHtmlTemplate(dateKey, dayIndex, displayDate, patientName, advice) {
+    function createReportHtmlTemplate(dateKey, dayIndex, displayDate, patientName, advice, dayLabel) {
         return `
             <div class="printable-report" style="margin-bottom: 0px; border: none; box-shadow: none;">
                 <!-- Header -->
                 <div class="report-title-area">
                     <div class="title-main">
                         <h2>栄養食事指導参考資料</h2>
-                        <p class="title-sub">食事記録レポート (${dayIndex}日目)</p>
+                        <p class="title-sub">食事記録レポート (${dayLabel}日目)</p>
                     </div>
                     <div class="meta-inputs">
                         <div class="meta-row">

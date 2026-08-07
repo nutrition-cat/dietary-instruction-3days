@@ -430,6 +430,28 @@ body {
     color: var(--text-muted);
     font-weight: 500;
     letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.day-number-input {
+    border: none;
+    border-bottom: 1.5px solid var(--text-muted);
+    padding: 0 2px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--primary-dark);
+    width: 35px;
+    text-align: center;
+    outline: none;
+    background: transparent;
+    transition: var(--transition);
+}
+
+.day-number-input:focus {
+    border-bottom-color: var(--primary);
+    background-color: var(--primary-light);
 }
 
 .meta-inputs {
@@ -958,8 +980,10 @@ body {
         color: transparent;
     }
     
-    .meta-input-field {
+    .meta-input-field,
+    .day-number-input {
         border-bottom: none !important;
+        background: transparent !important;
     }
     
     .advice-input {
