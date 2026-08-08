@@ -357,9 +357,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Set day label (e.g. "食事記録レポート (2日目)")
+        // Set day number input (e.g. 2 → "2日目")
         const dayIndex = parsedData.dates.indexOf(dateKey) + 1;
-        dayNumberLabel.textContent = `食事記録レポート (${dayIndex}日目)`;
+        if (dayNumberInput) dayNumberInput.value = String(dayIndex);
 
         renderReportForDate(dateKey);
     }
