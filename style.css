@@ -950,7 +950,6 @@ body {
     background-color: #ffffff;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
     box-shadow: 0 1px 3px rgba(0,0,0,0.02);
 }
 
@@ -975,10 +974,6 @@ body {
 /* Meal Block Inside Day Column */
 .summary-meal-block {
     border-bottom: 1px solid #edf2f7;
-    padding: 3px 6px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
     background-color: #ffffff;
 }
 
@@ -986,8 +981,34 @@ body {
     border-bottom: none;
 }
 
+/* Empty Meal Block: Collapsed to title bar only to save vertical space */
+.summary-meal-block.is-empty {
+    padding: 2px 6px;
+    background-color: #fafbfc;
+    flex-shrink: 0;
+}
+
+.summary-meal-block.is-empty .summary-meal-title {
+    margin-bottom: 0;
+    opacity: 0.65;
+    font-size: 9.5px;
+    padding: 1px 4px;
+    background-color: transparent !important;
+    border: 1px dashed rgba(0, 0, 0, 0.08);
+}
+
+/* Has-data Meal Block: Naturally sizes to fit all food items */
+.summary-meal-block.has-data {
+    padding: 3px 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    height: auto;
+    min-height: 50px;
+}
+
 .summary-meal-title {
-    font-size: 10.5px;
+    font-size: 10px;
     font-weight: 700;
     display: flex;
     justify-content: space-between;
@@ -1003,22 +1024,25 @@ body {
 .summary-meal-title.bg-other { background-color: var(--other-light); color: #576574; }
 
 .summary-meal-title .meal-sub-val {
-    font-size: 9.5px;
+    font-size: 9px;
     font-weight: 500;
     opacity: 0.85;
 }
 
 .summary-meal-body {
+    flex: 1;
     display: flex;
-    gap: 6px;
+    gap: 5px;
     align-items: flex-start;
+    min-height: 0;
 }
 
 /* Image Thumbnails inside summary meal */
 .summary-meal-images {
-    width: 50px;
-    height: 50px;
+    width: 48px;
+    height: 48px;
     flex-shrink: 0;
+    align-self: flex-start;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1035,38 +1059,30 @@ body {
 }
 
 .summary-no-img {
-    font-size: 8.5px;
+    font-size: 8px;
     color: #a0aec0;
     font-style: italic;
     text-align: center;
 }
 
-/* Food List (Narrow, Compact, No Space Wasting) */
+/* Food List (Flexible, No Cutoff, Shows All Items) */
 .summary-food-list {
     flex: 1;
     min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 1px;
-    max-height: 54px;
-    overflow-y: auto;
-}
-
-.summary-food-list::-webkit-scrollbar {
-    width: 2px;
-}
-.summary-food-list::-webkit-scrollbar-thumb {
-    background-color: #cbd5e1;
+    overflow-y: visible;
 }
 
 .summary-food-item {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    font-size: 10px;
+    font-size: 9.5px;
     line-height: 1.25;
     gap: 3px;
-    padding: 0 1px;
+    padding: 0.5px 1px;
     border-bottom: 1px dashed #f1f5f9;
 }
 
@@ -1084,7 +1100,7 @@ body {
 }
 
 .summary-food-unit {
-    font-size: 9px;
+    font-size: 8.5px;
     color: #718096;
     white-space: nowrap;
     text-align: right;

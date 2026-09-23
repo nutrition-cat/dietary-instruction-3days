@@ -518,64 +518,83 @@ document.addEventListener('DOMContentLoaded', () => {
             // Meal blocks
             mealTypes.forEach(m => {
                 const mealData = dayData.meals[m.type];
+                const hasImages = mealData.images && mealData.images.length > 0;
+                const hasItems = mealData.items && mealData.items.length > 0;
+                const isEmpty = !hasImages && !hasItems && Math.round(mealData.kcal) === 0;
+
                 const mealBlock = document.createElement('div');
-                mealBlock.className = 'summary-meal-block';
 
-                // Title bar
-                const mealTitle = document.createElement('div');
-                mealTitle.className = `summary-meal-title ${m.bgClass}`;
-                mealTitle.innerHTML = `
-                    <span>${m.icon} ${m.name}</span>
-                    <span class="meal-sub-val">${Math.round(mealData.kcal)} kcal</span>
-                `;
-                mealBlock.appendChild(mealTitle);
-
-                // Body (Photo thumbnail + Compact food items)
-                const mealBody = document.createElement('div');
-                mealBody.className = 'summary-meal-body';
-
-                // Thumbnail box
-                const imgBox = document.createElement('div');
-                imgBox.className = 'summary-meal-images';
-                if (mealData.images && mealData.images.length > 0) {
-                    const img = document.createElement('img');
-                    img.src = mealData.images[0];
-                    img.alt = `${m.name}写真`;
-                    imgBox.appendChild(img);
+                if (isEmpty) {
+                    // Empty meal: collapse body completely, leave only compact title bar
+                    mealBlock.className = 'summary-meal-block is-empty';
+                    const mealTitle = document.createElement('div');
+                    mealTitle.className = `summary-meal-title ${m.bgClass}`;
+                    mealTitle.innerHTML = `
+                        <span>${m.icon} ${m.name}</span>
+                        <span class="meal-sub-val" style="opacity: 0.5;">-</span>
+                    `;
+                    mealBlock.appendChild(mealTitle);
                 } else {
-                    imgBox.innerHTML = '<span class="summary-no-img">写真なし</span>';
+                    // Has data: expand flexibly so items don't get truncated
+                    mealBlock.className = 'summary-meal-block has-data';
+
+                    // Title bar
+                    const mealTitle = document.createElement('div');
+                    mealTitle.className = `summary-meal-title ${m.bgClass}`;
+                    mealTitle.innerHTML = `
+                        <span>${m.icon} ${m.name}</span>
+                        <span class="meal-sub-val">${Math.round(mealData.kcal)} kcal</span>
+                    `;
+                    mealBlock.appendChild(mealTitle);
+
+                    // Body (Photo thumbnail + Compact food items)
+                    const mealBody = document.createElement('div');
+                    mealBody.className = 'summary-meal-body';
+
+                    // Thumbnail box
+                    const imgBox = document.createElement('div');
+                    imgBox.className = 'summary-meal-images';
+                    if (hasImages) {
+                        const img = document.createElement('img');
+                        img.src = mealData.images[0];
+                        img.alt = `${m.name}写真`;
+                        imgBox.appendChild(img);
+                    } else {
+                        imgBox.innerHTML = '<span class="summary-no-img">写真なし</span>';
+                    }
+                    mealBody.appendChild(imgBox);
+
+                    // Food list (Extremely compact, food name + unit, no wasted width)
+                    const foodList = document.createElement('div');
+                    foodList.className = 'summary-food-list';
+                    if (!hasItems) {
+                        foodList.innerHTML = '<div class="summary-food-empty">記録なし</div>';
+                    } else {
+                        mealData.items.forEach(item => {
+                            const foodItem = document.createElement('div');
+                            foodItem.className = 'summary-food-item';
+                            
+                            const nameSpan = document.createElement('span');
+                            nameSpan.className = 'summary-food-name';
+                            nameSpan.textContent = item.name;
+                            nameSpan.title = item.name;
+
+                            foodItem.appendChild(nameSpan);
+
+                            if (item.unit) {
+                                const unitSpan = document.createElement('span');
+                                unitSpan.className = 'summary-food-unit';
+                                unitSpan.textContent = `(${item.unit})`;
+                                foodItem.appendChild(unitSpan);
+                            }
+                            foodList.appendChild(foodItem);
+                        });
+                    }
+                    mealBody.appendChild(foodList);
+
+                    mealBlock.appendChild(mealBody);
                 }
-                mealBody.appendChild(imgBox);
 
-                // Food list (Extremely compact, food name + unit, no wasted width)
-                const foodList = document.createElement('div');
-                foodList.className = 'summary-food-list';
-                if (!mealData.items || mealData.items.length === 0) {
-                    foodList.innerHTML = '<div class="summary-food-empty">記録なし</div>';
-                } else {
-                    mealData.items.forEach(item => {
-                        const foodItem = document.createElement('div');
-                        foodItem.className = 'summary-food-item';
-                        
-                        const nameSpan = document.createElement('span');
-                        nameSpan.className = 'summary-food-name';
-                        nameSpan.textContent = item.name;
-                        nameSpan.title = item.name;
-
-                        foodItem.appendChild(nameSpan);
-
-                        if (item.unit) {
-                            const unitSpan = document.createElement('span');
-                            unitSpan.className = 'summary-food-unit';
-                            unitSpan.textContent = `(${item.unit})`;
-                            foodItem.appendChild(unitSpan);
-                        }
-                        foodList.appendChild(foodItem);
-                    });
-                }
-                mealBody.appendChild(foodList);
-
-                mealBlock.appendChild(mealBody);
                 dayCol.appendChild(mealBlock);
             });
 
