@@ -72,19 +72,127 @@
                 </div>
                 <div class="header-right">
                     <button id="back-btn" class="btn-secondary"><i data-lucide="arrow-left"></i> 戻る</button>
+                    <button id="pdf-summary-btn" class="btn-primary"><i data-lucide="download"></i> 3日間まとめPDF（1枚）をダウンロード</button>
                     <button id="pdf-single-btn" class="btn-secondary"><i data-lucide="download"></i> 表示中の日をダウンロード</button>
-                    <button id="pdf-all-btn" class="btn-primary"><i data-lucide="download-cloud"></i> 全日程を一括ダウンロード</button>
+                    <button id="pdf-all-btn" class="btn-secondary"><i data-lucide="download-cloud"></i> 全日程を一括ダウンロード</button>
                 </div>
             </header>
 
             <!-- 日付切り替えタブUI (印刷時は非表示) -->
             <div id="date-tabs-container" class="date-tabs-container no-print">
-                <!-- JSで動的にボタン（例: 1日目 (6月20日)）が生成されます -->
+                <!-- JSで動的にボタン（例: 🌟 3日間まとめ (1枚), 1日目 (6月20日)）が生成されます -->
             </div>
 
             <div class="report-wrapper">
-                <!-- A4横サイズ相当の印刷用コンテナ -->
-                <div id="printable-report" class="printable-report">
+                <!-- 3日間まとめレポート（A4横1枚完結シート） -->
+                <div id="three-days-summary-report" class="printable-report summary-report-layout active">
+                    <!-- レポートヘッダー -->
+                    <div class="report-title-area">
+                        <div class="title-main">
+                            <h2>栄養食事指導参考資料</h2>
+                            <p class="title-sub">3日間 食事記録・推移レポート (1枚まとめ)</p>
+                        </div>
+                        <div class="meta-inputs">
+                            <div class="meta-row">
+                                <span class="meta-label">記録期間:</span>
+                                <span id="summary-period-display" class="meta-value">-</span>
+                            </div>
+                            <div class="meta-row">
+                                <span class="meta-label">対象者様:</span>
+                                <input type="text" id="summary-patient-name" class="meta-input-field" placeholder="氏名をご記入ください">
+                                <span class="meta-suffix">様</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 上段：3日間の食事比較マトリクス (横3列) -->
+                    <div id="summary-meals-grid" class="summary-meals-grid">
+                        <!-- JSで1日目、2日目、3日目のカラムが動的に生成されます -->
+                    </div>
+
+                    <!-- 下段：3日間の栄養推移分析 & アドバイス -->
+                    <div class="summary-bottom-grid">
+                        <!-- 左: 3日間の栄養推移・平均テーブル -->
+                        <div class="summary-analysis-left">
+                            <div class="section-subtitle">
+                                <i data-lucide="bar-chart-3" class="subtitle-icon"></i>
+                                <h3>3日間の栄養摂取推移・平均</h3>
+                            </div>
+                            <table class="summary-nutrients-table">
+                                <thead>
+                                    <tr>
+                                        <th>栄養区分</th>
+                                        <th id="th-day-1">1日目</th>
+                                        <th id="th-day-2">2日目</th>
+                                        <th id="th-day-3">3日目</th>
+                                        <th class="th-avg">3日平均</th>
+                                        <th class="th-ref">目標比率・目安</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="summary-nutrients-tbody">
+                                    <!-- JSで主要栄養素行が生成されます -->
+                                </tbody>
+                            </table>
+                            
+                            <!-- ビタミン群の3日平均要約バー -->
+                            <div id="summary-vitamins-bar" class="summary-vitamins-bar">
+                                <!-- JSでビタミンA, D, B1, B2, B6, Cの3日平均が生成されます -->
+                            </div>
+                        </div>
+
+                        <!-- 中: PFCバランス推移 & ドーナツグラフ -->
+                        <div class="summary-analysis-center">
+                            <div class="section-subtitle">
+                                <i data-lucide="pie-chart" class="subtitle-icon"></i>
+                                <h3>3日間のPFCバランス(平均)</h3>
+                            </div>
+                            <div class="summary-pfc-container">
+                                <div class="summary-chart-wrapper">
+                                    <canvas id="summaryPfcChart"></canvas>
+                                </div>
+                                <div class="summary-pfc-details">
+                                    <div class="summary-pfc-item protein">
+                                        <span class="legend-dot bg-pfc-p"></span>
+                                        <span class="legend-name">P (たんぱく質)</span>
+                                        <span id="summary-pfc-p-pct" class="legend-pct">- %</span>
+                                        <span id="summary-pfc-p-val" class="legend-val">0g</span>
+                                    </div>
+                                    <div class="summary-pfc-item fat">
+                                        <span class="legend-dot bg-pfc-f"></span>
+                                        <span class="legend-name">F (脂質)</span>
+                                        <span id="summary-pfc-f-pct" class="legend-pct">- %</span>
+                                        <span id="summary-pfc-f-val" class="legend-val">0g</span>
+                                    </div>
+                                    <div class="summary-pfc-item carb">
+                                        <span class="legend-dot bg-pfc-c"></span>
+                                        <span class="legend-name">C (炭水化物)</span>
+                                        <span id="summary-pfc-c-pct" class="legend-pct">- %</span>
+                                        <span id="summary-pfc-c-val" class="legend-val">0g</span>
+                                    </div>
+                                    <div class="pfc-target-ref">
+                                        <span class="ref-title">目標比率の目安（厚労省）:</span>
+                                        <span class="ref-body">P: 13〜20% | F: 20〜30% | C: 50〜65%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 右: 総合栄養指導メモ・アドバイス欄 -->
+                        <div class="summary-advice-section">
+                            <div class="advice-header">
+                                <i data-lucide="message-square" class="advice-icon"></i>
+                                <span>総合アドバイス・指導メモ</span>
+                            </div>
+                            <div class="advice-body">
+                                <textarea id="summary-advice-textarea" class="summary-advice-input no-print" placeholder="3日間の食事記録を通じた総合的な指導メモやアドバイス、次回目標などをここに入力できます（印刷時に反映されます）。"></textarea>
+                                <div id="summary-advice-print-display" class="advice-print-display" style="display: none;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- A4横サイズ相当の印刷用コンテナ (日別個別詳細用) -->
+                <div id="printable-report" class="printable-report" style="display: none;">
                     <!-- レポートヘッダー -->
                     <div class="report-title-area">
                         <div class="title-main">

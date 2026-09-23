@@ -13,14 +13,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadError = document.getElementById('upload-error');
     
     const backBtn = document.getElementById('back-btn');
+    const pdfSummaryBtn = document.getElementById('pdf-summary-btn');
     const pdfSingleBtn = document.getElementById('pdf-single-btn');
     const pdfAllBtn = document.getElementById('pdf-all-btn');
     
     const patientNameInput = document.getElementById('patient-name');
+    const summaryPatientName = document.getElementById('summary-patient-name');
     const reportDateDisplay = document.getElementById('report-date-display');
     const adviceTextarea = document.getElementById('advice-textarea');
+    const summaryAdviceTextarea = document.getElementById('summary-advice-textarea');
+    const summaryAdvicePrintDisplay = document.getElementById('summary-advice-print-display');
     const dateTabsContainer = document.getElementById('date-tabs-container');
     const dayNumberInput = document.getElementById('day-number-input');
+
+    // Synchronize patient name between summary report and single-day report
+    if (patientNameInput && summaryPatientName) {
+        patientNameInput.addEventListener('input', (e) => {
+            summaryPatientName.value = e.target.value;
+        });
+        summaryPatientName.addEventListener('input', (e) => {
+            patientNameInput.value = e.target.value;
+        });
+    }
 
     // Synchronize day number input to global state
     dayNumberInput.addEventListener('input', (e) => {
@@ -30,9 +44,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Global state
-    let parsedData = null; // Stores all days: { days: { "2026-06-22": { meals, totals } }, dates: [...] }
-    let activeDateKey = null; // Currently selected date key
+    let parsedData = null; // Stores all days: { days: { "2026-06-22": { meals, totals } }, dates: [...], summaryAdvice: "" }
+    let activeTab = 'summary'; // 'summary' or dateKey
+    let activeDateKey = null; // Currently selected date key for single report
     let pfcChartInstance = null; // Single chart instance for preview screen
+    let summaryChartInstance = null; // Chart instance for 3-day summary report
 
     // Synchronize advice textarea input to preview div
     adviceTextarea.addEventListener('input', (e) => {
@@ -41,6 +57,18 @@ document.addEventListener('DOMContentLoaded', () => {
             display.textContent = e.target.value || "アドバイスは未記入です。";
         }
     });
+
+    // Synchronize summary advice textarea input to preview div and state
+    if (summaryAdviceTextarea) {
+        summaryAdviceTextarea.addEventListener('input', (e) => {
+            if (parsedData) {
+                parsedData.summaryAdvice = e.target.value;
+            }
+            if (summaryAdvicePrintDisplay) {
+                summaryAdvicePrintDisplay.textContent = e.target.value || "アドバイスは未記入です。";
+            }
+        });
+    }
 
 
 
@@ -293,15 +321,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             parsedData = {
                 days: daysData,
-                dates: sortedDates
+                dates: sortedDates,
+                summaryAdvice: ""
             };
 
             fileInput.value = '';
             showLoading(false);
             
-            // Build date tabs and render first day
+            // Build date tabs and render 3-day summary report first (User default: 1-page 3-day summary)
             buildDateTabs();
-            selectDay(sortedDates[0]);
+            selectSummaryTab();
             showScreen('report-section');
 
         } catch (err) {
@@ -323,45 +352,396 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // 2. TABS MANAGEMENT
     // ==========================================
+    function saveCurrentState() {
+        if (activeTab === 'summary') {
+            if (summaryAdviceTextarea && parsedData) {
+                parsedData.summaryAdvice = summaryAdviceTextarea.value;
+            }
+        } else if (activeDateKey && parsedData && parsedData.days[activeDateKey]) {
+            if (adviceTextarea) {
+                parsedData.days[activeDateKey].advice = adviceTextarea.value;
+            }
+        }
+    }
+
     function buildDateTabs() {
         dateTabsContainer.innerHTML = '';
+
+        // 1. "3日間まとめ (1枚)" Tab
+        const summaryBtn = document.createElement('button');
+        summaryBtn.className = 'tab-btn active';
+        summaryBtn.dataset.tab = 'summary';
+        summaryBtn.innerHTML = '<i data-lucide="sparkles" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;"></i>3日間まとめ (1枚)';
+        summaryBtn.addEventListener('click', () => {
+            saveCurrentState();
+            selectSummaryTab();
+        });
+        dateTabsContainer.appendChild(summaryBtn);
+
+        // 2. Day-by-day tabs
         parsedData.dates.forEach((dateKey, index) => {
             const btn = document.createElement('button');
             btn.className = 'tab-btn';
-            btn.dataset.date = dateKey;
+            btn.dataset.tab = dateKey;
             
-            // Format button text: e.g. "1日目 (6月22日)"
             const d = new Date(dateKey);
             btn.textContent = `${index + 1}日目 (${d.getMonth() + 1}月${d.getDate()}日)`;
             
             btn.addEventListener('click', () => {
-                // Save current advice first
-                if (activeDateKey) {
-                    parsedData.days[activeDateKey].advice = adviceTextarea.value;
-                }
+                saveCurrentState();
                 selectDay(dateKey);
             });
             dateTabsContainer.appendChild(btn);
         });
+
+        lucide.createIcons();
     }
 
-    function selectDay(dateKey) {
-        activeDateKey = dateKey;
+    function selectSummaryTab() {
+        activeTab = 'summary';
         
         // Active tab styling
         document.querySelectorAll('.tab-btn').forEach(btn => {
-            if (btn.dataset.date === dateKey) {
+            if (btn.dataset.tab === 'summary') {
                 btn.classList.add('active');
             } else {
                 btn.classList.remove('active');
             }
         });
 
+        // Switch visible containers
+        const summaryReport = document.getElementById('three-days-summary-report');
+        const singleReport = document.getElementById('printable-report');
+        if (summaryReport) {
+            summaryReport.style.display = 'block';
+            summaryReport.classList.add('active');
+        }
+        if (singleReport) {
+            singleReport.style.display = 'none';
+            singleReport.classList.remove('active');
+        }
+
+        // Toggle action buttons
+        if (pdfSummaryBtn) pdfSummaryBtn.style.display = 'inline-flex';
+        if (pdfSingleBtn) pdfSingleBtn.style.display = 'none';
+        if (pdfAllBtn) pdfAllBtn.style.display = 'none';
+
+        render3DaysSummaryReport();
+    }
+
+    function selectDay(dateKey) {
+        activeTab = dateKey;
+        activeDateKey = dateKey;
+        
+        // Active tab styling
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            if (btn.dataset.tab === dateKey) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        // Switch visible containers
+        const summaryReport = document.getElementById('three-days-summary-report');
+        const singleReport = document.getElementById('printable-report');
+        if (summaryReport) {
+            summaryReport.style.display = 'none';
+            summaryReport.classList.remove('active');
+        }
+        if (singleReport) {
+            singleReport.style.display = 'block';
+            singleReport.classList.add('active');
+        }
+
+        // Toggle action buttons
+        if (pdfSummaryBtn) pdfSummaryBtn.style.display = 'none';
+        if (pdfSingleBtn) pdfSingleBtn.style.display = 'inline-flex';
+        if (pdfAllBtn) pdfAllBtn.style.display = 'inline-flex';
+
         // Set day number input (e.g. 2 → "2日目")
         const dayIndex = parsedData.dates.indexOf(dateKey) + 1;
         if (dayNumberInput) dayNumberInput.value = String(dayIndex);
 
         renderReportForDate(dateKey);
+    }
+
+    // ==========================================
+    // 2.5 3-DAY INTEGRATED SUMMARY REPORT RENDERING
+    // ==========================================
+    function render3DaysSummaryReport() {
+        if (!parsedData || !parsedData.dates || parsedData.dates.length === 0) return;
+
+        // 1. Period & Patient metadata
+        const firstDate = new Date(parsedData.dates[0]);
+        const lastDate = new Date(parsedData.dates[parsedData.dates.length - 1]);
+        const periodDisplay = document.getElementById('summary-period-display');
+        if (periodDisplay) {
+            if (parsedData.dates.length === 1) {
+                periodDisplay.textContent = `${firstDate.getFullYear()}年${firstDate.getMonth() + 1}月${firstDate.getDate()}日`;
+            } else {
+                periodDisplay.textContent = `${firstDate.getFullYear()}年${firstDate.getMonth() + 1}月${firstDate.getDate()}日 〜 ${lastDate.getMonth() + 1}月${lastDate.getDate()}日 (${parsedData.dates.length}日間)`;
+            }
+        }
+
+        // Sync patient name
+        if (patientNameInput && summaryPatientName) {
+            summaryPatientName.value = patientNameInput.value;
+        }
+
+        // 2. Meals Grid (3 Days horizontal columns)
+        const summaryMealsGrid = document.getElementById('summary-meals-grid');
+        summaryMealsGrid.innerHTML = '';
+
+        const mealTypes = [
+            { type: 'breakfast', name: '朝食', icon: '☀️', bgClass: 'bg-breakfast' },
+            { type: 'lunch', name: '昼食', icon: '🕛', bgClass: 'bg-lunch' },
+            { type: 'dinner', name: '夕食', icon: '🌙', bgClass: 'bg-dinner' },
+            { type: 'other', name: 'その他', icon: '☕', bgClass: 'bg-other' }
+        ];
+
+        parsedData.dates.forEach((dateKey, index) => {
+            const dayData = parsedData.days[dateKey];
+            const d = new Date(dateKey);
+            const dayCol = document.createElement('div');
+            dayCol.className = 'summary-day-col';
+
+            // Column Header
+            const dayHeader = document.createElement('div');
+            dayHeader.className = 'summary-day-header';
+            dayHeader.innerHTML = `
+                <span>${index + 1}日目 <span style="font-weight:400;font-size:10.5px;">(${d.getMonth() + 1}月${d.getDate()}日)</span></span>
+                <span class="day-sub-kcal">${Math.round(dayData.totals.kcal)} kcal</span>
+            `;
+            dayCol.appendChild(dayHeader);
+
+            // Meal blocks
+            mealTypes.forEach(m => {
+                const mealData = dayData.meals[m.type];
+                const mealBlock = document.createElement('div');
+                mealBlock.className = 'summary-meal-block';
+
+                // Title bar
+                const mealTitle = document.createElement('div');
+                mealTitle.className = `summary-meal-title ${m.bgClass}`;
+                mealTitle.innerHTML = `
+                    <span>${m.icon} ${m.name}</span>
+                    <span class="meal-sub-val">${Math.round(mealData.kcal)} kcal</span>
+                `;
+                mealBlock.appendChild(mealTitle);
+
+                // Body (Photo thumbnail + Compact food items)
+                const mealBody = document.createElement('div');
+                mealBody.className = 'summary-meal-body';
+
+                // Thumbnail box
+                const imgBox = document.createElement('div');
+                imgBox.className = 'summary-meal-images';
+                if (mealData.images && mealData.images.length > 0) {
+                    const img = document.createElement('img');
+                    img.src = mealData.images[0];
+                    img.alt = `${m.name}写真`;
+                    imgBox.appendChild(img);
+                } else {
+                    imgBox.innerHTML = '<span class="summary-no-img">写真なし</span>';
+                }
+                mealBody.appendChild(imgBox);
+
+                // Food list (Extremely compact, food name + unit, no wasted width)
+                const foodList = document.createElement('div');
+                foodList.className = 'summary-food-list';
+                if (!mealData.items || mealData.items.length === 0) {
+                    foodList.innerHTML = '<div class="summary-food-empty">記録なし</div>';
+                } else {
+                    mealData.items.forEach(item => {
+                        const foodItem = document.createElement('div');
+                        foodItem.className = 'summary-food-item';
+                        
+                        const nameSpan = document.createElement('span');
+                        nameSpan.className = 'summary-food-name';
+                        nameSpan.textContent = item.name;
+                        nameSpan.title = item.name;
+
+                        foodItem.appendChild(nameSpan);
+
+                        if (item.unit) {
+                            const unitSpan = document.createElement('span');
+                            unitSpan.className = 'summary-food-unit';
+                            unitSpan.textContent = `(${item.unit})`;
+                            foodItem.appendChild(unitSpan);
+                        }
+                        foodList.appendChild(foodItem);
+                    });
+                }
+                mealBody.appendChild(foodList);
+
+                mealBlock.appendChild(mealBody);
+                dayCol.appendChild(mealBlock);
+            });
+
+            summaryMealsGrid.appendChild(dayCol);
+        });
+
+        // 3. Nutrients Comparison Table
+        const tbody = document.getElementById('summary-nutrients-tbody');
+        tbody.innerHTML = '';
+
+        const nutrientDefinitions = [
+            { key: 'kcal', name: 'エネルギー', unit: 'kcal', digits: 0, ref: '1800〜2200' },
+            { key: 'protein', name: 'たんぱく質', unit: 'g', digits: 1, ref: '50〜65g' },
+            { key: 'fat', name: '脂質', unit: 'g', digits: 1, ref: '20〜30%' },
+            { key: 'carb', name: '炭水化物', unit: 'g', digits: 1, ref: '50〜65%' },
+            { key: 'fiber', name: '食物繊維', unit: 'g', digits: 1, ref: '18g以上' },
+            { key: 'calcium', name: 'カルシウム', unit: 'mg', digits: 0, ref: '650〜800' },
+            { key: 'iron', name: '鉄', unit: 'mg', digits: 1, ref: '6.5〜10.5' },
+            { key: 'salt', name: '食塩相当量', unit: 'g', digits: 1, ref: '7.5g未満' }
+        ];
+
+        const numDays = parsedData.dates.length;
+
+        // Dynamic TH headers
+        parsedData.dates.forEach((dateKey, idx) => {
+            const thEl = document.getElementById(`th-day-${idx + 1}`);
+            if (thEl) {
+                const d = new Date(dateKey);
+                thEl.textContent = `${idx + 1}日目(${d.getMonth() + 1}/${d.getDate()})`;
+            }
+        });
+
+        nutrientDefinitions.forEach(def => {
+            const tr = document.createElement('tr');
+            let rowHtml = `<td>${def.name} <span style="font-weight:400;font-size:8px;color:#718096;">(${def.unit})</span></td>`;
+
+            let sum = 0;
+            parsedData.dates.forEach(dateKey => {
+                const val = parsedData.days[dateKey].totals[def.key] || 0;
+                sum += val;
+                const displayVal = def.digits === 0 ? Math.round(val) : val.toFixed(def.digits);
+                rowHtml += `<td>${displayVal}</td>`;
+            });
+
+            // 3-day average
+            const avg = numDays > 0 ? sum / numDays : 0;
+            const displayAvg = def.digits === 0 ? Math.round(avg) : avg.toFixed(def.digits);
+            rowHtml += `<td class="col-avg">${displayAvg}</td>`;
+            rowHtml += `<td class="col-ref">${def.ref}</td>`;
+
+            tr.innerHTML = rowHtml;
+            tbody.appendChild(tr);
+        });
+
+        // 4. Vitamins 3-day Average Summary Bar
+        const vitBar = document.getElementById('summary-vitamins-bar');
+        if (vitBar) {
+            const vits = [
+                { key: 'vitA', label: 'ビタミンA', unit: 'µg', digits: 0 },
+                { key: 'vitD', label: 'ビタミンD', unit: 'µg', digits: 1 },
+                { key: 'vitB1', label: 'ビタミンB1', unit: 'mg', digits: 2 },
+                { key: 'vitB2', label: 'ビタミンB2', unit: 'mg', digits: 2 },
+                { key: 'vitB6', label: 'ビタミンB6', unit: 'mg', digits: 2 },
+                { key: 'vitC', label: 'ビタミンC', unit: 'mg', digits: 0 }
+            ];
+
+            vitBar.innerHTML = vits.map(v => {
+                let sum = 0;
+                parsedData.dates.forEach(dateKey => {
+                    sum += (parsedData.days[dateKey].totals[v.key] || 0);
+                });
+                const avg = numDays > 0 ? sum / numDays : 0;
+                const valStr = v.digits === 0 ? Math.round(avg) : avg.toFixed(v.digits);
+                return `
+                    <div class="summary-vit-item">
+                        <span class="summary-vit-lbl">${v.label} (平均)</span>
+                        <span class="summary-vit-val">${valStr} ${v.unit}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 5. PFC Balance 3-day Average Donut Chart
+        let totalP = 0, totalF = 0, totalC = 0;
+        parsedData.dates.forEach(dateKey => {
+            const t = parsedData.days[dateKey].totals;
+            totalP += t.protein;
+            totalF += t.fat;
+            totalC += t.carb;
+        });
+
+        const avgP = numDays > 0 ? totalP / numDays : 0;
+        const avgF = numDays > 0 ? totalF / numDays : 0;
+        const avgC = numDays > 0 ? totalC / numDays : 0;
+
+        const pKcal = avgP * 4;
+        const fKcal = avgF * 9;
+        const cKcal = avgC * 4;
+        const totalPfcKcal = pKcal + fKcal + cKcal;
+
+        let pPct = 0, fPct = 0, cPct = 0;
+        if (totalPfcKcal > 0) {
+            pPct = (pKcal / totalPfcKcal) * 100;
+            fPct = (fKcal / totalPfcKcal) * 100;
+            cPct = (cKcal / totalPfcKcal) * 100;
+        }
+
+        const pPctEl = document.getElementById('summary-pfc-p-pct');
+        const pValEl = document.getElementById('summary-pfc-p-val');
+        const fPctEl = document.getElementById('summary-pfc-f-pct');
+        const fValEl = document.getElementById('summary-pfc-f-val');
+        const cPctEl = document.getElementById('summary-pfc-c-pct');
+        const cValEl = document.getElementById('summary-pfc-c-val');
+
+        if (pPctEl) pPctEl.textContent = `${pPct.toFixed(1)}%`;
+        if (pValEl) pValEl.textContent = `${avgP.toFixed(1)}g`;
+        if (fPctEl) fPctEl.textContent = `${fPct.toFixed(1)}%`;
+        if (fValEl) fValEl.textContent = `${avgF.toFixed(1)}g`;
+        if (cPctEl) cPctEl.textContent = `${cPct.toFixed(1)}%`;
+        if (cValEl) cValEl.textContent = `${avgC.toFixed(1)}g`;
+
+        const chartCanvas = document.getElementById('summaryPfcChart');
+        if (chartCanvas) {
+            const ctx = chartCanvas.getContext('2d');
+            if (summaryChartInstance) {
+                summaryChartInstance.destroy();
+            }
+
+            summaryChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['P (たんぱく質)', 'F (脂質)', 'C (炭水化物)'],
+                    datasets: [{
+                        data: [pKcal, fKcal, cKcal],
+                        backgroundColor: ['#ff6b6b', '#feca57', '#48dbfb'],
+                        borderWidth: 1.5,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.raw;
+                                    const pct = ((val / totalPfcKcal) * 100).toFixed(1);
+                                    return `${context.label}: ${Math.round(val)} kcal (${pct}%)`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '65%',
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // 6. Advice sync
+        if (summaryAdviceTextarea) {
+            summaryAdviceTextarea.value = parsedData.summaryAdvice || "";
+            if (summaryAdvicePrintDisplay) {
+                summaryAdvicePrintDisplay.textContent = parsedData.summaryAdvice || "アドバイスは未記入です。";
+            }
+        }
     }
 
     // ==========================================
@@ -526,8 +906,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // 4. PDF GENERATION (SINGLE DAY & ALL DAYS)
+    // 4. PDF GENERATION (SUMMARY, SINGLE DAY & ALL DAYS)
     // ==========================================
+    // 4.0 Download 3-Day Integrated Summary (Exact 1-page A4 Landscape)
+    if (pdfSummaryBtn) {
+        pdfSummaryBtn.addEventListener('click', () => {
+            // Save advice first
+            if (summaryAdviceTextarea && parsedData) {
+                parsedData.summaryAdvice = summaryAdviceTextarea.value;
+            }
+
+            const element = document.getElementById('three-days-summary-report');
+            const patientName = (summaryPatientName ? summaryPatientName.value.trim() : '') || (patientNameInput ? patientNameInput.value.trim() : '');
+            
+            const firstDate = parsedData && parsedData.dates ? new Date(parsedData.dates[0]) : null;
+            const dateStr = firstDate ? `${firstDate.getMonth() + 1}月` : '食事記録';
+            const filename = `栄養食事指導参考資料_${patientName ? patientName + '様' : '食事記録'}_3日間まとめ.pdf`;
+
+            const opt = {
+                margin: [4, 6, 4, 6], // Top/Bottom 4mm, Left/Right 6mm
+                filename: filename,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false, letterRendering: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+                pagebreak: { mode: ['css', 'legacy'] }
+            };
+
+            // Switch textarea to preview div during PDF compilation
+            if (summaryAdvicePrintDisplay) {
+                summaryAdvicePrintDisplay.textContent = (summaryAdviceTextarea ? summaryAdviceTextarea.value : '') || "アドバイスは未記入です。";
+                summaryAdvicePrintDisplay.style.display = 'block';
+            }
+            if (summaryAdviceTextarea) summaryAdviceTextarea.style.display = 'none';
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                if (summaryAdvicePrintDisplay) summaryAdvicePrintDisplay.style.display = 'none';
+                if (summaryAdviceTextarea) summaryAdviceTextarea.style.display = 'block';
+            }).catch(err => {
+                console.error(err);
+                if (summaryAdvicePrintDisplay) summaryAdvicePrintDisplay.style.display = 'none';
+                if (summaryAdviceTextarea) summaryAdviceTextarea.style.display = 'block';
+                alert('PDFの出力中にエラーが発生しました。');
+            });
+        });
+    }
+
     // 4.1 Download active single day
     pdfSingleBtn.addEventListener('click', () => {
         // Save current advice first
