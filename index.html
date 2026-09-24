@@ -72,9 +72,9 @@
                 </div>
                 <div class="header-right">
                     <button id="back-btn" class="btn-secondary"><i data-lucide="arrow-left"></i> 戻る</button>
-                    <button id="pdf-summary-btn" class="btn-primary"><i data-lucide="download"></i> 3日間まとめPDF（1枚）をダウンロード</button>
-                    <button id="pdf-single-btn" class="btn-secondary"><i data-lucide="download"></i> 表示中の日をダウンロード</button>
-                    <button id="pdf-all-btn" class="btn-secondary"><i data-lucide="download-cloud"></i> 全日程を一括ダウンロード</button>
+                    <button id="pdf-summary-btn" class="btn-primary"><i data-lucide="download"></i> 3日間まとめPDF（1枚）</button>
+                    <button id="pdf-single-btn" class="btn-secondary" style="display: none;"><i data-lucide="file-text"></i> 表示中の日をダウンロード（1枚）</button>
+                    <button id="pdf-all-btn" class="btn-secondary"><i data-lucide="download-cloud"></i> 全日程を一括ダウンロード（各日1枚）</button>
                 </div>
             </header>
 
@@ -126,7 +126,6 @@
                                         <th id="th-day-2">2日目</th>
                                         <th id="th-day-3">3日目</th>
                                         <th class="th-avg">3日平均</th>
-                                        <th class="th-ref">目標比率・目安</th>
                                     </tr>
                                 </thead>
                                 <tbody id="summary-nutrients-tbody">
@@ -212,18 +211,16 @@
                         </div>
                     </div>
 
-                    <!-- 上段：食事内容と写真（朝・昼・夕・その他） -->
+                    <!-- 上段：食事内容と写真（朝・昼・夕・その他 横4列） -->
                     <div class="meals-grid">
                         <!-- 朝食ブロック -->
                         <div class="meal-card" id="meal-breakfast">
-                            <div class="meal-card-left">
-                                <div class="meal-card-header bg-breakfast">
-                                    <span class="meal-icon">☀️</span>
-                                    <h3>朝食</h3>
-                                </div>
-                                <div class="meal-images-container" id="images-breakfast">
-                                    <!-- JSで画像が挿入されます -->
-                                </div>
+                            <div class="meal-card-header bg-breakfast">
+                                <span class="meal-icon">☀️</span>
+                                <h3>朝食</h3>
+                            </div>
+                            <div class="meal-images-container" id="images-breakfast">
+                                <!-- JSで画像が挿入されます -->
                             </div>
                             <div class="meal-table-container">
                                 <table>
@@ -231,7 +228,7 @@
                                         <tr>
                                             <th>料理名</th>
                                             <th>メモ</th>
-                                            <th style="width: 120px; text-align: right;">単位</th>
+                                            <th style="width: 50px; text-align: right;">単位</th>
                                         </tr>
                                     </thead>
                                     <tbody id="list-breakfast">
@@ -243,14 +240,12 @@
 
                         <!-- 昼食ブロック -->
                         <div class="meal-card" id="meal-lunch">
-                            <div class="meal-card-left">
-                                <div class="meal-card-header bg-lunch">
-                                    <span class="meal-icon">🕛</span>
-                                    <h3>昼食</h3>
-                                </div>
-                                <div class="meal-images-container" id="images-lunch">
-                                    <!-- JSで画像が挿入されます -->
-                                </div>
+                            <div class="meal-card-header bg-lunch">
+                                <span class="meal-icon">🕛</span>
+                                <h3>昼食</h3>
+                            </div>
+                            <div class="meal-images-container" id="images-lunch">
+                                <!-- JSで画像が挿入されます -->
                             </div>
                             <div class="meal-table-container">
                                 <table>
@@ -258,7 +253,7 @@
                                         <tr>
                                             <th>料理名</th>
                                             <th>メモ</th>
-                                            <th style="width: 120px; text-align: right;">単位</th>
+                                            <th style="width: 50px; text-align: right;">単位</th>
                                         </tr>
                                     </thead>
                                     <tbody id="list-lunch">
@@ -270,14 +265,12 @@
 
                         <!-- 夕食ブロック -->
                         <div class="meal-card" id="meal-dinner">
-                            <div class="meal-card-left">
-                                <div class="meal-card-header bg-dinner">
-                                    <span class="meal-icon">🌙</span>
-                                    <h3>夕食</h3>
-                                </div>
-                                <div class="meal-images-container" id="images-dinner">
-                                    <!-- JSで画像が挿入されます -->
-                                </div>
+                            <div class="meal-card-header bg-dinner">
+                                <span class="meal-icon">🌙</span>
+                                <h3>夕食</h3>
+                            </div>
+                            <div class="meal-images-container" id="images-dinner">
+                                <!-- JSで画像が挿入されます -->
                             </div>
                             <div class="meal-table-container">
                                 <table>
@@ -285,7 +278,7 @@
                                         <tr>
                                             <th>料理名</th>
                                             <th>メモ</th>
-                                            <th style="width: 120px; text-align: right;">単位</th>
+                                            <th style="width: 50px; text-align: right;">単位</th>
                                         </tr>
                                     </thead>
                                     <tbody id="list-dinner">
@@ -297,14 +290,12 @@
 
                         <!-- その他ブロック -->
                         <div class="meal-card" id="meal-other">
-                            <div class="meal-card-left">
-                                <div class="meal-card-header bg-other">
-                                    <span class="meal-icon">☕</span>
-                                    <h3>その他</h3>
-                                </div>
-                                <div class="meal-images-container" id="images-other">
-                                    <!-- JSで画像が挿入されます -->
-                                </div>
+                            <div class="meal-card-header bg-other">
+                                <span class="meal-icon">☕</span>
+                                <h3>その他</h3>
+                            </div>
+                            <div class="meal-images-container" id="images-other">
+                                <!-- JSで画像が挿入されます -->
                             </div>
                             <div class="meal-table-container">
                                 <table>
@@ -312,7 +303,7 @@
                                         <tr>
                                             <th>料理名</th>
                                             <th>メモ</th>
-                                            <th style="width: 120px; text-align: right;">単位</th>
+                                            <th style="width: 50px; text-align: right;">単位</th>
                                         </tr>
                                     </thead>
                                     <tbody id="list-other">

@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Toggle action buttons
         if (pdfSummaryBtn) pdfSummaryBtn.style.display = 'inline-flex';
         if (pdfSingleBtn) pdfSingleBtn.style.display = 'none';
-        if (pdfAllBtn) pdfAllBtn.style.display = 'none';
+        if (pdfAllBtn) pdfAllBtn.style.display = 'inline-flex';
 
         render3DaysSummaryReport();
     }
@@ -455,7 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Toggle action buttons
-        if (pdfSummaryBtn) pdfSummaryBtn.style.display = 'none';
+        if (pdfSummaryBtn) pdfSummaryBtn.style.display = 'inline-flex';
         if (pdfSingleBtn) pdfSingleBtn.style.display = 'inline-flex';
         if (pdfAllBtn) pdfAllBtn.style.display = 'inline-flex';
 
@@ -606,14 +606,14 @@ document.addEventListener('DOMContentLoaded', () => {
         tbody.innerHTML = '';
 
         const nutrientDefinitions = [
-            { key: 'kcal', name: 'エネルギー', unit: 'kcal', digits: 0, ref: '1800〜2200' },
-            { key: 'protein', name: 'たんぱく質', unit: 'g', digits: 1, ref: '50〜65g' },
-            { key: 'fat', name: '脂質', unit: 'g', digits: 1, ref: '20〜30%' },
-            { key: 'carb', name: '炭水化物', unit: 'g', digits: 1, ref: '50〜65%' },
-            { key: 'fiber', name: '食物繊維', unit: 'g', digits: 1, ref: '18g以上' },
-            { key: 'calcium', name: 'カルシウム', unit: 'mg', digits: 0, ref: '650〜800' },
-            { key: 'iron', name: '鉄', unit: 'mg', digits: 1, ref: '6.5〜10.5' },
-            { key: 'salt', name: '食塩相当量', unit: 'g', digits: 1, ref: '7.5g未満' }
+            { key: 'kcal', name: 'エネルギー', unit: 'kcal', digits: 0 },
+            { key: 'protein', name: 'たんぱく質', unit: 'g', digits: 1 },
+            { key: 'fat', name: '脂質', unit: 'g', digits: 1 },
+            { key: 'carb', name: '炭水化物', unit: 'g', digits: 1 },
+            { key: 'fiber', name: '食物繊維', unit: 'g', digits: 1 },
+            { key: 'calcium', name: 'カルシウム', unit: 'mg', digits: 0 },
+            { key: 'iron', name: '鉄', unit: 'mg', digits: 1 },
+            { key: 'salt', name: '食塩相当量', unit: 'g', digits: 1 }
         ];
 
         const numDays = parsedData.dates.length;
@@ -643,7 +643,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const avg = numDays > 0 ? sum / numDays : 0;
             const displayAvg = def.digits === 0 ? Math.round(avg) : avg.toFixed(def.digits);
             rowHtml += `<td class="col-avg">${displayAvg}</td>`;
-            rowHtml += `<td class="col-ref">${def.ref}</td>`;
 
             tr.innerHTML = rowHtml;
             tbody.appendChild(tr);
@@ -985,7 +984,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const filename = `栄養食事指導参考資料_${patientName ? patientName + '様' : '食事記録'}_${dateStr}.pdf`;
         
         const opt = {
-            margin: 10,
+            margin: [6, 8, 6, 8],
             filename: filename,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2, useCORS: true, logging: false, letterRendering: true },
@@ -1035,6 +1034,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Create report wrapper
                 const wrapper = document.createElement('div');
                 wrapper.className = 'printable-report-wrapper';
+                if (i < parsedData.dates.length - 1) {
+                    wrapper.style.pageBreakAfter = 'always';
+                    wrapper.style.breakAfter = 'page';
+                }
                 
                 // Inject report structure template
                 wrapper.innerHTML = createReportHtmlTemplate(dateKey, dayIndex, dayData.displayDate, patientName, dayData.advice, dayLabel);
@@ -1045,17 +1048,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Render specific chart for this day page
                 renderPfcChartForContainer(wrapper, dayData.totals, dayIndex);
-
-                // 最後の日付でなければ、次の日付の前に強制改ページを挿入する
-                if (i < parsedData.dates.length - 1) {
-                    const pageBreak = document.createElement('div');
-                    pageBreak.className = 'html2pdf__page-break';
-                    printContainer.appendChild(pageBreak);
-                }
             }
 
             const opt = {
-                margin: 10,
+                margin: [6, 8, 6, 8],
                 filename: filename,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2, useCORS: true, logging: false, letterRendering: true },
@@ -1103,21 +1099,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         const jpName = type === 'breakfast' ? '朝食' : type === 'lunch' ? '昼食' : type === 'dinner' ? '夕食' : 'その他';
                         const emoji = type === 'breakfast' ? '☀️' : type === 'lunch' ? '🕛' : type === 'dinner' ? '🌙' : '☕';
                         return `
-                            <div class="meal-card">
-                                <div class="meal-card-left">
-                                    <div class="meal-card-header bg-${type}">
-                                        <span class="meal-icon">${emoji}</span>
-                                        <h3>${jpName}</h3>
-                                    </div>
-                                    <div class="meal-images-container" id="images-${type}-${dayIndex}"></div>
+                            <div class="meal-card" id="meal-${type}-${dayIndex}">
+                                <div class="meal-card-header bg-${type}">
+                                    <span class="meal-icon">${emoji}</span>
+                                    <h3>${jpName}</h3>
                                 </div>
+                                <div class="meal-images-container" id="images-${type}-${dayIndex}"></div>
                                 <div class="meal-table-container">
                                     <table>
                                         <thead>
                                             <tr>
                                                 <th>料理名</th>
                                                 <th>メモ</th>
-                                                <th style="width: 120px; text-align: right;">単位</th>
+                                                <th style="width: 50px; text-align: right;">単位</th>
                                             </tr>
                                         </thead>
                                         <tbody id="list-${type}-${dayIndex}"></tbody>
@@ -1197,7 +1191,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <div class="pfc-container">
                             <div class="chart-wrapper">
-                                <canvas id="pfcChart-${dayIndex}"></canvas>
+                                <canvas id="pfcChart-${dayIndex}" width="80" height="80"></canvas>
                             </div>
                             <div class="pfc-details">
                                 <div class="pfc-legend-item protein"><span class="legend-dot bg-pfc-p"></span><span class="legend-name">P (たんぱく質)</span><span id="pfc-p-val-${dayIndex}" class="legend-val">-</span><span id="pfc-p-pct-${dayIndex}" class="legend-pct">-</span></div>
@@ -1326,6 +1320,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }]
             },
             options: {
+                animation: false,
                 plugins: {
                     legend: { display: false },
                     tooltip: { enabled: false } // No tooltips needed on static PDF output
