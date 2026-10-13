@@ -514,24 +514,34 @@ body {
     flex-direction: column;
     background-color: #fafbfc;
     overflow: hidden;
-    height: 180px; /* Exact height to fit A4 landscape */
+    height: 195px; /* Precise height to fit A4 landscape */
 }
 
 .meal-card-header {
-    padding: 4px 8px;
+    padding: 3px 8px;
     display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: space-between;
+    gap: 4px;
     color: white;
 }
 
 .meal-card-header h3 {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
+    margin: 0;
+    flex: 1;
+}
+
+.meal-card-kcal {
+    font-size: 10px;
+    font-weight: 600;
+    opacity: 0.95;
 }
 
 .meal-icon {
     font-size: 13px;
+    margin-right: 4px;
 }
 
 .bg-breakfast { background-color: var(--breakfast); }
@@ -539,21 +549,22 @@ body {
 .bg-dinner { background-color: var(--dinner); }
 .bg-other { background-color: var(--other); }
 
-/* Images Container in Meal Card */
+/* Images Container in Meal Card (Compact, 46px height) */
 .meal-images-container {
-    height: 60px;
+    height: 46px;
     display: flex;
-    gap: 5px;
-    padding: 4px;
+    gap: 4px;
+    padding: 3px 4px;
     background-color: #f1f3f5;
     overflow-x: auto;
     align-items: center;
     border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
 }
 
 /* Hide scrollbars for image container */
 .meal-images-container::-webkit-scrollbar {
-    height: 4px;
+    height: 3px;
 }
 .meal-images-container::-webkit-scrollbar-thumb {
     background-color: #cbd5e1;
@@ -562,18 +573,18 @@ body {
 
 .meal-img-wrapper {
     flex-shrink: 0;
-    height: 52px;
-    width: 52px;
+    height: 40px;
+    width: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .meal-img {
-    height: 50px;
-    width: 50px;
+    height: 38px;
+    width: 38px;
     object-fit: cover;
-    border-radius: 4px;
+    border-radius: 3px;
     border: 1px solid rgba(0,0,0,0.08);
     background-color: white;
     cursor: pointer;
@@ -585,54 +596,94 @@ body {
 }
 
 .no-image-placeholder {
-    font-size: 10px;
+    font-size: 9px;
     color: var(--text-muted);
     text-align: center;
     width: 100%;
     font-style: italic;
 }
 
-/* Meal Food List Table */
-.meal-table-container {
+/* Meal Food List Container (NO SCROLLBAR: auto 2 columns if 5+ items) */
+.meal-food-container {
     flex: 1;
-    overflow-y: auto;
-    padding: 3px;
-}
-
-.meal-table-container::-webkit-scrollbar {
-    width: 4px;
-}
-.meal-table-container::-webkit-scrollbar-thumb {
-    background-color: #cbd5e1;
-    border-radius: 2px;
-}
-
-.meal-card table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 11px;
-}
-
-.meal-card th {
-    font-weight: 600;
-    color: var(--text-muted);
-    text-align: left;
+    overflow-y: visible;
     padding: 4px 6px;
-    border-bottom: 1px solid var(--border-color);
-    background-color: #fafbfc;
-    position: sticky;
-    top: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
-.meal-card td {
-    padding: 3px 5px;
-    border-bottom: 1px dashed var(--border-color);
-    vertical-align: top;
-    word-break: break-all;
+.meal-food-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5px;
+    width: 100%;
 }
 
-.meal-card tr:last-child td {
+/* 2-column layout when 5+ items (prevents vertical stretch even with 8-12 items) */
+.meal-food-list.two-cols {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 6px;
+    row-gap: 1.5px;
+}
+
+.meal-food-item {
+    display: flex;
+    flex-direction: column;
+    padding: 1px 0;
+    border-bottom: 1px dashed #edf2f7;
+    min-width: 0;
+}
+
+.meal-food-item:last-child {
     border-bottom: none;
+}
+
+.meal-food-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 2px;
+    min-width: 0;
+}
+
+.meal-food-name {
+    font-size: 9px;
+    font-weight: 500;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+    line-height: 1.25;
+}
+
+.meal-food-unit {
+    font-size: 7.5px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+    text-align: right;
+    margin-left: 2px;
+}
+
+.meal-food-memo {
+    font-size: 7.5px;
+    color: #a0aec0;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.meal-food-empty {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-style: italic;
+    text-align: center;
+    padding: 20px 0;
 }
 
 /* Lower Section: Analysis Grid */
@@ -1378,16 +1429,20 @@ body {
     }
 
     .meal-card {
-        height: 180px !important;
-        max-height: 180px !important;
+        height: 195px !important;
+        max-height: 195px !important;
         break-inside: avoid;
         page-break-inside: avoid;
         overflow: hidden !important;
     }
     
-    .meal-table-container {
-        overflow-y: hidden !important;
-        height: auto !important;
+    .meal-food-container {
+        overflow-y: visible !important;
+    }
+
+    .meal-food-list {
+        overflow-y: visible !important;
+        max-height: none !important;
     }
 
     .analysis-section {

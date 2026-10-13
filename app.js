@@ -826,6 +826,71 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Helper: Render food items compactly (2 columns when 5+ items)
+    function renderMealFoodItems(listEl, items) {
+        if (!listEl) return;
+        listEl.innerHTML = '';
+        const isTwoCols = items.length >= 5;
+        listEl.className = `meal-food-list ${isTwoCols ? 'two-cols' : ''}`;
+        
+        if (items.length === 0) {
+            listEl.innerHTML = '<div class="meal-food-empty">食事データなし</div>';
+            return;
+        }
+        
+        items.forEach(item => {
+            const itemEl = document.createElement('div');
+            itemEl.className = 'meal-food-item';
+            
+            const mainEl = document.createElement('div');
+            mainEl.className = 'meal-food-main';
+            
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'meal-food-name';
+            nameSpan.textContent = item.name;
+            nameSpan.title = item.name;
+            mainEl.appendChild(nameSpan);
+            
+            if (item.unit) {
+                const unitSpan = document.createElement('span');
+                unitSpan.className = 'meal-food-unit';
+                unitSpan.textContent = `(${item.unit})`;
+                mainEl.appendChild(unitSpan);
+            }
+            itemEl.appendChild(mainEl);
+            
+            if (item.memo) {
+                const memoSpan = document.createElement('span');
+                memoSpan.className = 'meal-food-memo';
+                memoSpan.textContent = item.memo;
+                itemEl.appendChild(memoSpan);
+            }
+            
+            listEl.appendChild(itemEl);
+        });
+    }
+
+    // Helper: Render meal photos (compact, hidden when no image)
+    function renderMealImages(imgContainer, images, typeName) {
+        if (!imgContainer) return;
+        imgContainer.innerHTML = '';
+        if (!images || images.length === 0) {
+            imgContainer.style.display = 'none'; // 写真がないときは非表示にして食事リスト領域を広く確保
+        } else {
+            imgContainer.style.display = 'flex';
+            images.forEach(imgSrc => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'meal-img-wrapper';
+                const img = document.createElement('img');
+                img.src = imgSrc;
+                img.className = 'meal-img';
+                img.alt = `${typeName} 写真`;
+                wrapper.appendChild(img);
+                imgContainer.appendChild(wrapper);
+            });
+        }
+    }
+
     // ==========================================
     // 3. REPORT RENDERING FOR SELECTED DATE
     // ==========================================
@@ -859,42 +924,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const mealTypes = ['breakfast', 'lunch', 'dinner', 'other'];
         
         mealTypes.forEach(type => {
-            const container = document.getElementById(`list-${type}`);
+            const listEl = document.getElementById(`list-${type}`);
             const imgContainer = document.getElementById(`images-${type}`);
+            const kcalEl = document.getElementById(`kcal-${type}`);
             const data = meals[type];
 
-            // 1. Food items
-            container.innerHTML = '';
-            if (data.items.length === 0) {
-                container.innerHTML = `<tr><td colspan="3" class="text-muted text-center" style="font-style:italic; padding:12px;">食事データなし</td></tr>`;
-            } else {
-                data.items.forEach(item => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td style="font-weight: 500;">${item.name}</td>
-                        <td class="text-muted">${item.memo}</td>
-                        <td style="text-align: right; font-weight: 500;">${item.unit}</td>
-                    `;
-                    container.appendChild(tr);
-                });
+            // 0. Sub kcal in header
+            if (kcalEl) {
+                kcalEl.textContent = (data.items.length > 0 || Math.round(data.kcal) > 0) ? `${Math.round(data.kcal)} kcal` : '';
             }
 
-            // 2. Images (Unique duplicates filtered already in parse)
-            imgContainer.innerHTML = '';
-            if (data.images.length === 0) {
-                imgContainer.innerHTML = `<span class="no-image-placeholder">写真なし</span>`;
-            } else {
-                data.images.forEach(imgSrc => {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'meal-img-wrapper';
-                    const img = document.createElement('img');
-                    img.src = imgSrc;
-                    img.className = 'meal-img';
-                    img.alt = `${type} image`;
-                    wrapper.appendChild(img);
-                    imgContainer.appendChild(wrapper);
-                });
-            }
+            // 1. Food items (No scrolling: automatically 2 columns if 5+ items)
+            renderMealFoodItems(listEl, data.items);
+
+            // 2. Images (Hidden when no image to give maximum vertical space to food list)
+            renderMealImages(imgContainer, data.images, type);
 
             // 3. Section sub-totals in nutrition table (Kcal, P, F, C, Salt now dynamic per meal!)
             document.getElementById(`val-${type}-kcal`).textContent = `${Math.round(data.kcal)} kcal`;
@@ -1167,19 +1211,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <div class="meal-card-header bg-${type}">
                                     <span class="meal-icon">${emoji}</span>
                                     <h3>${jpName}</h3>
+                                    <span class="meal-card-kcal" id="kcal-${type}-${dayIndex}"></span>
                                 </div>
                                 <div class="meal-images-container" id="images-${type}-${dayIndex}"></div>
-                                <div class="meal-table-container">
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>料理名</th>
-                                                <th>メモ</th>
-                                                <th style="width: 50px; text-align: right;">単位</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="list-${type}-${dayIndex}"></tbody>
-                                    </table>
+                                <div class="meal-food-container">
+                                    <div class="meal-food-list" id="list-${type}-${dayIndex}"></div>
                                 </div>
                             </div>
                         `;
@@ -1291,34 +1327,19 @@ document.addEventListener('DOMContentLoaded', () => {
         mealTypes.forEach(type => {
             const listEl = wrapper.querySelector(`#list-${type}-${dayIndex}`);
             const imgEl = wrapper.querySelector(`#images-${type}-${dayIndex}`);
+            const kcalEl = wrapper.querySelector(`#kcal-${type}-${dayIndex}`);
             const data = meals[type];
 
-            // Food List
-            if (data.items.length === 0) {
-                listEl.innerHTML = `<tr><td colspan="3" class="text-muted text-center" style="font-style:italic; padding:12px;">食事データなし</td></tr>`;
-            } else {
-                data.items.forEach(item => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `<td style="font-weight: 500;">${item.name}</td><td class="text-muted">${item.memo}</td><td style="text-align: right; font-weight: 500;">${item.unit}</td>`;
-                    listEl.appendChild(tr);
-                });
+            // Sub kcal
+            if (kcalEl) {
+                kcalEl.textContent = (data.items.length > 0 || Math.round(data.kcal) > 0) ? `${Math.round(data.kcal)} kcal` : '';
             }
 
-            // Food Images
-            if (data.images.length === 0) {
-                imgEl.innerHTML = `<span class="no-image-placeholder">写真なし</span>`;
-            } else {
-                data.images.forEach(imgSrc => {
-                    const wrapperDiv = document.createElement('div');
-                    wrapperDiv.className = 'meal-img-wrapper';
-                    const img = document.createElement('img');
-                    img.src = imgSrc;
-                    img.className = 'meal-img';
-                    img.alt = `${type} image`;
-                    wrapperDiv.appendChild(img);
-                    imgEl.appendChild(wrapperDiv);
-                });
-            }
+            // Food List (compact 2 columns when 5+ items, no scrolling)
+            renderMealFoodItems(listEl, data.items);
+
+            // Food Images (hidden when empty)
+            renderMealImages(imgEl, data.images, type);
 
             // Sub-nutrition values
             wrapper.querySelector(`#val-${type}-kcal-${dayIndex}`).textContent = `${Math.round(data.kcal)} kcal`;
