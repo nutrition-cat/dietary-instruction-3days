@@ -44,8 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Global state
-    let parsedData = null; // Stores all days: { days: { "2026-06-22": { meals, totals } }, dates: [...], summaryAdvice: "" }
-    let activeTab = 'summary'; // 'summary' or dateKey
+    let parsedData = null; // Stores all days: { days: { "2026-06-22": { meals, totals } }, dates: [...], groups: [...], summaryAdvice: {} }
+    let activeTab = 'summary_0'; // 'summary_0', 'summary_1' or dateKey
+    let activeSummaryGroupIndex = 0; // Currently selected 3-day group index
     let activeDateKey = null; // Currently selected date key for single report
     let pfcChartInstance = null; // Single chart instance for preview screen
     let summaryChartInstance = null; // Chart instance for 3-day summary report
@@ -61,8 +62,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Synchronize summary advice textarea input to preview div and state
     if (summaryAdviceTextarea) {
         summaryAdviceTextarea.addEventListener('input', (e) => {
-            if (parsedData) {
-                parsedData.summaryAdvice = e.target.value;
+            if (parsedData && parsedData.groups && parsedData.groups[activeSummaryGroupIndex]) {
+                parsedData.groups[activeSummaryGroupIndex].advice = e.target.value;
             }
             if (summaryAdvicePrintDisplay) {
                 summaryAdvicePrintDisplay.textContent = e.target.value || "アドバイスは未記入です。";
@@ -319,18 +320,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error('日付を特定できるデータが見つかりませんでした。');
             }
 
+            // 3日ごとのグループ（チャンク）に分割
+            const groups = [];
+            for (let i = 0; i < sortedDates.length; i += 3) {
+                const chunkDates = sortedDates.slice(i, i + 3);
+                const startNum = i + 1;
+                const endNum = i + chunkDates.length;
+                const label = startNum === endNum ? `${startNum}日目` : `${startNum}〜${endNum}日目`;
+                groups.push({
+                    groupIndex: groups.length,
+                    startIndex: startNum,
+                    endIndex: endNum,
+                    label: label,
+                    dates: chunkDates,
+                    advice: ""
+                });
+            }
+
             parsedData = {
                 days: daysData,
                 dates: sortedDates,
-                summaryAdvice: ""
+                groups: groups,
+                summaryAdvice: {}
             };
+            activeSummaryGroupIndex = 0;
 
             fileInput.value = '';
             showLoading(false);
             
             // Build date tabs and render 3-day summary report first (User default: 1-page 3-day summary)
             buildDateTabs();
-            selectSummaryTab();
+            selectSummaryTab(0);
             showScreen('report-section');
 
         } catch (err) {
@@ -353,9 +373,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. TABS MANAGEMENT
     // ==========================================
     function saveCurrentState() {
-        if (activeTab === 'summary') {
-            if (summaryAdviceTextarea && parsedData) {
-                parsedData.summaryAdvice = summaryAdviceTextarea.value;
+        if (activeTab.startsWith('summary')) {
+            if (summaryAdviceTextarea && parsedData && parsedData.groups && parsedData.groups[activeSummaryGroupIndex]) {
+                parsedData.groups[activeSummaryGroupIndex].advice = summaryAdviceTextarea.value;
             }
         } else if (activeDateKey && parsedData && parsedData.days[activeDateKey]) {
             if (adviceTextarea) {
@@ -367,21 +387,35 @@ document.addEventListener('DOMContentLoaded', () => {
     function buildDateTabs() {
         dateTabsContainer.innerHTML = '';
 
-        // 1. "3日間まとめ (1枚)" Tab
-        const summaryBtn = document.createElement('button');
-        summaryBtn.className = 'tab-btn active';
-        summaryBtn.dataset.tab = 'summary';
-        summaryBtn.innerHTML = '<i data-lucide="sparkles" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;"></i>3日間まとめ (1枚)';
-        summaryBtn.addEventListener('click', () => {
-            saveCurrentState();
-            selectSummaryTab();
-        });
-        dateTabsContainer.appendChild(summaryBtn);
+        // 1. "3日間まとめ" Tab(s)
+        if (parsedData.groups.length <= 1) {
+            const summaryBtn = document.createElement('button');
+            summaryBtn.className = 'tab-btn active';
+            summaryBtn.dataset.tab = 'summary_0';
+            summaryBtn.innerHTML = '<i data-lucide="sparkles" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;"></i>3日間まとめ (1枚)';
+            summaryBtn.addEventListener('click', () => {
+                saveCurrentState();
+                selectSummaryTab(0);
+            });
+            dateTabsContainer.appendChild(summaryBtn);
+        } else {
+            parsedData.groups.forEach((group, gIdx) => {
+                const summaryBtn = document.createElement('button');
+                summaryBtn.className = `tab-btn ${gIdx === activeSummaryGroupIndex && activeTab.startsWith('summary') ? 'active' : ''}`;
+                summaryBtn.dataset.tab = `summary_${gIdx}`;
+                summaryBtn.innerHTML = `<i data-lucide="sparkles" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;"></i>3日間まとめ (${group.label})`;
+                summaryBtn.addEventListener('click', () => {
+                    saveCurrentState();
+                    selectSummaryTab(gIdx);
+                });
+                dateTabsContainer.appendChild(summaryBtn);
+            });
+        }
 
         // 2. Day-by-day tabs
         parsedData.dates.forEach((dateKey, index) => {
             const btn = document.createElement('button');
-            btn.className = 'tab-btn';
+            btn.className = `tab-btn ${activeTab === dateKey ? 'active' : ''}`;
             btn.dataset.tab = dateKey;
             
             const d = new Date(dateKey);
@@ -397,12 +431,13 @@ document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
     }
 
-    function selectSummaryTab() {
-        activeTab = 'summary';
+    function selectSummaryTab(groupIndex = 0) {
+        activeTab = `summary_${groupIndex}`;
+        activeSummaryGroupIndex = groupIndex;
         
         // Active tab styling
         document.querySelectorAll('.tab-btn').forEach(btn => {
-            if (btn.dataset.tab === 'summary') {
+            if (btn.dataset.tab === `summary_${groupIndex}`) {
                 btn.classList.add('active');
             } else {
                 btn.classList.remove('active');
@@ -426,7 +461,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (pdfSingleBtn) pdfSingleBtn.style.display = 'none';
         if (pdfAllBtn) pdfAllBtn.style.display = 'inline-flex';
 
-        render3DaysSummaryReport();
+        // Load advice for this group
+        const currentGroup = (parsedData && parsedData.groups) ? parsedData.groups[groupIndex] : null;
+        if (summaryAdviceTextarea) {
+            summaryAdviceTextarea.value = (currentGroup && currentGroup.advice) ? currentGroup.advice : '';
+        }
+        if (summaryAdvicePrintDisplay) {
+            summaryAdvicePrintDisplay.textContent = (currentGroup && currentGroup.advice) ? currentGroup.advice : "アドバイスは未記入です。";
+        }
+
+        render3DaysSummaryReport(groupIndex);
     }
 
     function selectDay(dateKey) {
@@ -469,19 +513,28 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // 2.5 3-DAY INTEGRATED SUMMARY REPORT RENDERING
     // ==========================================
-    function render3DaysSummaryReport() {
-        if (!parsedData || !parsedData.dates || parsedData.dates.length === 0) return;
+    function render3DaysSummaryReport(groupIndex = activeSummaryGroupIndex) {
+        if (!parsedData || !parsedData.groups || parsedData.groups.length === 0) return;
+        const currentGroup = parsedData.groups[groupIndex] || parsedData.groups[0];
+        const targetDates = currentGroup.dates;
+        if (!targetDates || targetDates.length === 0) return;
 
         // 1. Period & Patient metadata
-        const firstDate = new Date(parsedData.dates[0]);
-        const lastDate = new Date(parsedData.dates[parsedData.dates.length - 1]);
+        const firstDate = new Date(targetDates[0]);
+        const lastDate = new Date(targetDates[targetDates.length - 1]);
         const periodDisplay = document.getElementById('summary-period-display');
+        const summaryTitleSub = document.querySelector('.summary-title-area .title-sub');
+
         if (periodDisplay) {
-            if (parsedData.dates.length === 1) {
-                periodDisplay.textContent = `${firstDate.getFullYear()}年${firstDate.getMonth() + 1}月${firstDate.getDate()}日`;
+            if (targetDates.length === 1) {
+                periodDisplay.textContent = `${firstDate.getFullYear()}年${firstDate.getMonth() + 1}月${firstDate.getDate()}日 (${currentGroup.label})`;
             } else {
-                periodDisplay.textContent = `${firstDate.getFullYear()}年${firstDate.getMonth() + 1}月${firstDate.getDate()}日 〜 ${lastDate.getMonth() + 1}月${lastDate.getDate()}日 (${parsedData.dates.length}日間)`;
+                periodDisplay.textContent = `${firstDate.getFullYear()}年${firstDate.getMonth() + 1}月${firstDate.getDate()}日 〜 ${lastDate.getMonth() + 1}月${lastDate.getDate()}日 (${currentGroup.label} / ${targetDates.length}日間)`;
             }
+        }
+
+        if (summaryTitleSub) {
+            summaryTitleSub.textContent = `3日間 食事記録・推移レポート (${currentGroup.label} / 1枚まとめ)`;
         }
 
         // Sync patient name
@@ -489,7 +542,7 @@ document.addEventListener('DOMContentLoaded', () => {
             summaryPatientName.value = patientNameInput.value;
         }
 
-        // 2. Meals Grid (3 Days horizontal columns)
+        // 2. Meals Grid (常に targetDates の日数分＝最大3列！)
         const summaryMealsGrid = document.getElementById('summary-meals-grid');
         summaryMealsGrid.innerHTML = '';
 
@@ -500,7 +553,8 @@ document.addEventListener('DOMContentLoaded', () => {
             { type: 'other', name: 'その他', icon: '☕', bgClass: 'bg-other' }
         ];
 
-        parsedData.dates.forEach((dateKey, index) => {
+        targetDates.forEach((dateKey) => {
+            const globalIndex = parsedData.dates.indexOf(dateKey) + 1;
             const dayData = parsedData.days[dateKey];
             const d = new Date(dateKey);
             const dayCol = document.createElement('div');
@@ -510,7 +564,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const dayHeader = document.createElement('div');
             dayHeader.className = 'summary-day-header';
             dayHeader.innerHTML = `
-                <span>${index + 1}日目 <span style="font-weight:400;font-size:10.5px;">(${d.getMonth() + 1}月${d.getDate()}日)</span></span>
+                <span>${globalIndex}日目 <span style="font-weight:400;font-size:10px;">(${d.getMonth() + 1}月${d.getDate()}日)</span></span>
                 <span class="day-sub-kcal">${Math.round(dayData.totals.kcal)} kcal</span>
             `;
             dayCol.appendChild(dayHeader);
@@ -562,10 +616,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         mealBody.appendChild(imgBox);
                     }
 
-                    // Food list (Extremely compact, food name + unit, no wasted width)
+                    // Food list (写真の有無にかかわらず、5品以上なら2列化して縦伸び防止)
                     const foodList = document.createElement('div');
-                    // When no images and 6 or more items, split into 2 compact columns to prevent vertical overflow
-                    const isTwoCols = !hasImages && mealData.items.length >= 6;
+                    const isTwoCols = mealData.items.length >= 5;
                     foodList.className = `summary-food-list ${isTwoCols ? 'two-cols' : ''}`;
                     if (!hasItems) {
                         foodList.innerHTML = '<div class="summary-food-empty">記録なし</div>';
@@ -616,14 +669,21 @@ document.addEventListener('DOMContentLoaded', () => {
             { key: 'salt', name: '食塩相当量', unit: 'g', digits: 1 }
         ];
 
-        const numDays = parsedData.dates.length;
+        const numDays = targetDates.length;
 
-        // Dynamic TH headers
-        parsedData.dates.forEach((dateKey, idx) => {
-            const thEl = document.getElementById(`th-day-${idx + 1}`);
+        // Dynamic TH headers (対象3日間の通算日・日付を表示)
+        [0, 1, 2].forEach(i => {
+            const thEl = document.getElementById(`th-day-${i + 1}`);
             if (thEl) {
-                const d = new Date(dateKey);
-                thEl.textContent = `${idx + 1}日目(${d.getMonth() + 1}/${d.getDate()})`;
+                if (i < targetDates.length) {
+                    const dateKey = targetDates[i];
+                    const globalIdx = parsedData.dates.indexOf(dateKey) + 1;
+                    const d = new Date(dateKey);
+                    thEl.textContent = `${globalIdx}日目(${d.getMonth() + 1}/${d.getDate()})`;
+                    thEl.style.display = '';
+                } else {
+                    thEl.textContent = '-';
+                }
             }
         });
 
@@ -632,12 +692,16 @@ document.addEventListener('DOMContentLoaded', () => {
             let rowHtml = `<td>${def.name} <span style="font-weight:400;font-size:8px;color:#718096;">(${def.unit})</span></td>`;
 
             let sum = 0;
-            parsedData.dates.forEach(dateKey => {
+            targetDates.forEach(dateKey => {
                 const val = parsedData.days[dateKey].totals[def.key] || 0;
                 sum += val;
                 const displayVal = def.digits === 0 ? Math.round(val) : val.toFixed(def.digits);
                 rowHtml += `<td>${displayVal}</td>`;
             });
+            // 3日未満の端数グループの場合の空セル補填
+            for (let k = targetDates.length; k < 3; k++) {
+                rowHtml += `<td>-</td>`;
+            }
 
             // 3-day average
             const avg = numDays > 0 ? sum / numDays : 0;
@@ -662,7 +726,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             vitBar.innerHTML = vits.map(v => {
                 let sum = 0;
-                parsedData.dates.forEach(dateKey => {
+                targetDates.forEach(dateKey => {
                     sum += (parsedData.days[dateKey].totals[v.key] || 0);
                 });
                 const avg = numDays > 0 ? sum / numDays : 0;
@@ -678,7 +742,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 5. PFC Balance 3-day Average Donut Chart
         let totalP = 0, totalF = 0, totalC = 0;
-        parsedData.dates.forEach(dateKey => {
+        targetDates.forEach(dateKey => {
             const t = parsedData.days[dateKey].totals;
             totalP += t.protein;
             totalF += t.fat;
@@ -755,9 +819,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 6. Advice sync
         if (summaryAdviceTextarea) {
-            summaryAdviceTextarea.value = parsedData.summaryAdvice || "";
+            summaryAdviceTextarea.value = currentGroup.advice || "";
             if (summaryAdvicePrintDisplay) {
-                summaryAdvicePrintDisplay.textContent = parsedData.summaryAdvice || "アドバイスは未記入です。";
+                summaryAdvicePrintDisplay.textContent = currentGroup.advice || "アドバイスは未記入です。";
             }
         }
     }
@@ -930,16 +994,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (pdfSummaryBtn) {
         pdfSummaryBtn.addEventListener('click', () => {
             // Save advice first
-            if (summaryAdviceTextarea && parsedData) {
-                parsedData.summaryAdvice = summaryAdviceTextarea.value;
+            if (summaryAdviceTextarea && parsedData && parsedData.groups && parsedData.groups[activeSummaryGroupIndex]) {
+                parsedData.groups[activeSummaryGroupIndex].advice = summaryAdviceTextarea.value;
             }
 
             const element = document.getElementById('three-days-summary-report');
             const patientName = (summaryPatientName ? summaryPatientName.value.trim() : '') || (patientNameInput ? patientNameInput.value.trim() : '');
             
-            const firstDate = parsedData && parsedData.dates ? new Date(parsedData.dates[0]) : null;
-            const dateStr = firstDate ? `${firstDate.getMonth() + 1}月` : '食事記録';
-            const filename = `栄養食事指導参考資料_${patientName ? patientName + '様' : '食事記録'}_3日間まとめ.pdf`;
+            const currentGroup = (parsedData && parsedData.groups) ? parsedData.groups[activeSummaryGroupIndex] : null;
+            const groupSuffix = currentGroup ? `_${currentGroup.label}` : '';
+            const filename = `栄養食事指導参考資料_${patientName ? patientName + '様' : '食事記録'}_3日間まとめ${groupSuffix}.pdf`;
 
             const opt = {
                 margin: [4, 6, 4, 6], // Top/Bottom 4mm, Left/Right 6mm
