@@ -551,22 +551,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     const mealBody = document.createElement('div');
                     mealBody.className = 'summary-meal-body';
 
-                    // Thumbnail box
-                    const imgBox = document.createElement('div');
-                    imgBox.className = 'summary-meal-images';
+                    // Thumbnail box (Only render when meal actually has photos)
                     if (hasImages) {
+                        const imgBox = document.createElement('div');
+                        imgBox.className = 'summary-meal-images';
                         const img = document.createElement('img');
                         img.src = mealData.images[0];
                         img.alt = `${m.name}写真`;
                         imgBox.appendChild(img);
-                    } else {
-                        imgBox.innerHTML = '<span class="summary-no-img">写真なし</span>';
+                        mealBody.appendChild(imgBox);
                     }
-                    mealBody.appendChild(imgBox);
 
                     // Food list (Extremely compact, food name + unit, no wasted width)
                     const foodList = document.createElement('div');
-                    foodList.className = 'summary-food-list';
+                    // When no images and 6 or more items, split into 2 compact columns to prevent vertical overflow
+                    const isTwoCols = !hasImages && mealData.items.length >= 6;
+                    foodList.className = `summary-food-list ${isTwoCols ? 'two-cols' : ''}`;
                     if (!hasItems) {
                         foodList.innerHTML = '<div class="summary-food-empty">記録なし</div>';
                     } else {

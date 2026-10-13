@@ -943,7 +943,7 @@ body {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .summary-day-col {
@@ -953,6 +953,7 @@ body {
     display: flex;
     flex-direction: column;
     box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    overflow: hidden;
 }
 
 .summary-day-header {
@@ -1001,12 +1002,12 @@ body {
 
 /* Has-data Meal Block: Naturally sizes to fit all food items */
 .summary-meal-block.has-data {
-    padding: 3px 6px;
+    padding: 2.5px 5px;
     display: flex;
     flex-direction: column;
     gap: 2px;
     height: auto;
-    min-height: 50px;
+    min-height: 40px;
 }
 
 .summary-meal-title {
@@ -1041,8 +1042,8 @@ body {
 
 /* Image Thumbnails inside summary meal */
 .summary-meal-images {
-    width: 48px;
-    height: 48px;
+    width: 42px;
+    height: 42px;
     flex-shrink: 0;
     align-self: flex-start;
     display: flex;
@@ -1077,15 +1078,24 @@ body {
     overflow-y: visible;
 }
 
+/* 2-column layout when no photos and 6+ items */
+.summary-food-list.two-cols {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 8px;
+    row-gap: 1px;
+}
+
 .summary-food-item {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    font-size: 9.5px;
+    font-size: 9px;
     line-height: 1.25;
     gap: 3px;
-    padding: 0.5px 1px;
+    padding: 0.5px 0;
     border-bottom: 1px dashed #f1f5f9;
+    min-width: 0;
 }
 
 .summary-food-item:last-child {
@@ -1099,14 +1109,16 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     flex: 1;
+    min-width: 0;
 }
 
 .summary-food-unit {
-    font-size: 8.5px;
+    font-size: 8px;
     color: #718096;
     white-space: nowrap;
     text-align: right;
     flex-shrink: 0;
+    margin-left: 2px;
 }
 
 .summary-food-empty {
